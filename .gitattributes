@@ -1,0 +1,19 @@
+# Enforce consistent line endings across platforms.
+# Shell scripts MUST be LF — they run in Linux CI and on Mac.
+*.sh        text eol=lf
+*.bash      text eol=lf
+
+# Go is LF (gofmt enforces this).
+*.go        text eol=lf
+go.mod      text eol=lf
+go.sum      text eol=lf
+
+# YAML is LF (CI parsers prefer it).
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Markdown is whatever the platform wants.
+*.md        text
+
+# Catch-all default.
+*           text=auto

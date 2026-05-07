@@ -1,0 +1,39 @@
+# Build artifacts
+ratchet
+ratchet.exe
+/bin/
+/dist/
+*.test
+*.out
+
+# Go
+vendor/
+*.exe
+*.o
+*.a
+
+# ratchet runtime artifacts
+.ratchet/reflections/
+.ratchet/transcripts/
+.ratchet/evidence/
+.ratchet/settings.local.toml
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Direnv / dotenv
+.env
+.env.local
+.envrc
+
+# CI scratch
+/tmp/
+*.log
