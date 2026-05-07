@@ -144,7 +144,7 @@ func LoadSkill(repoRoot string, ref GateRef) (Gate, error) {
 // The file MUST start with `---` and contain a closing `---` on its own line.
 // Returns frontmatter (without delimiters) and body.
 func splitFrontmatter(s string) (front, body string, err error) {
-	s = strings.TrimLeft(s, "﻿") // strip UTF-8 BOM if present
+	s = strings.TrimLeft(s, "\uFEFF") // strip UTF-8 BOM if present
 	if !strings.HasPrefix(s, "---\n") && !strings.HasPrefix(s, "---\r\n") {
 		return "", "", errors.New("missing leading --- delimiter")
 	}
