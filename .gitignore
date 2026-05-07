@@ -1,6 +1,6 @@
-# Build artifacts
-ratchet
-ratchet.exe
+# Build artifacts (root-level only — `cmd/ratchet/` is a directory, not a binary)
+/ratchet
+/ratchet.exe
 /bin/
 /dist/
 *.test
