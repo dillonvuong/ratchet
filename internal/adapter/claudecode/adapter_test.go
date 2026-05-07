@@ -20,11 +20,52 @@ func TestIsCompatibleCLIVersion(t *testing.T) {
 		{"2.0.99", false},
 		{"1.99.99", false},
 		{"2.1.0-beta", true}, // pre-release suffix ignored
+		// Unparseable input MUST refuse, not silently accept.
+		{"", false},
+		{"garbage", false},
+		{"v2.1.0", false}, // leading 'v' is non-numeric
+		{"2", false},      // single-component is not SemVer-shaped
 	}
 	for _, c := range cases {
 		if got := IsCompatibleCLIVersion(c.in); got != c.want {
 			t.Errorf("IsCompatibleCLIVersion(%q) = %v, want %v", c.in, got, c.want)
 		}
+	}
+}
+
+func TestExtractVersion(t *testing.T) {
+	cases := []struct {
+		in, want string
+	}{
+		{"claude code 2.1.132 (Claude Code)", "2.1.132"},
+		{"2.1.132", "2.1.132"},
+		{"version: v2.1.132 build foo", "2.1.132"},
+		{"no version here", ""},
+		{"2", ""}, // requires a dot
+	}
+	for _, c := range cases {
+		if got := extractVersion(c.in); got != c.want {
+			t.Errorf("extractVersion(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}
+
+func TestVerifyCLIVersion_FromEnv(t *testing.T) {
+	t.Setenv("RATCHET_CLAUDE_CLI_VERSION", "2.1.0")
+	if err := VerifyCLIVersion(); err != nil {
+		t.Errorf("expected ok, got %v", err)
+	}
+	t.Setenv("RATCHET_CLAUDE_CLI_VERSION", "1.5.0")
+	if err := VerifyCLIVersion(); err == nil {
+		t.Errorf("expected refusal on old version")
+	}
+}
+
+func TestVerifyCLIVersion_SkipsWhenAsked(t *testing.T) {
+	t.Setenv("RATCHET_SKIP_HOST_CHECK", "1")
+	t.Setenv("RATCHET_CLAUDE_CLI_VERSION", "0.0.1") // would otherwise refuse
+	if err := VerifyCLIVersion(); err != nil {
+		t.Errorf("expected skip, got %v", err)
 	}
 }
 

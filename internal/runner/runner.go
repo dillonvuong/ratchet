@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dillon-vuong/ratchet/internal/gitsubstrate"
 	"github.com/dillon-vuong/ratchet/internal/reflections"
 	"github.com/dillon-vuong/ratchet/internal/transcripts"
 )
@@ -51,30 +52,21 @@ func New(cfg *Config, taskID string, opts Options) (*Runner, error) {
 }
 
 // Run dispatches all declared gates in order and aggregates the verdict.
-// Spec §15.1.
+// Spec §7.3 (severity-aware abort) and §15.1.
 func (r *Runner) Run() Verdict {
 	gateRuns := make([]GateRun, 0, len(r.cfg.LoadedGates))
-	var seenNO, seenERROR, seenPARTIAL bool
+	var p0Failed bool
+gateLoop:
 	for _, gate := range r.cfg.LoadedGates {
-		if gate.Severity == SeverityP0 && seenNO {
-			fmt.Fprintf(os.Stderr, "ratchet: skipping gate %q (preceded by P0 NO verdict)\n", gate.Name)
-			continue
-		}
 		gr := r.RunGate(gate)
 		gateRuns = append(gateRuns, gr)
-		switch gr.Verdict.Value {
-		case VerdictNO:
-			seenNO = true
-			if gate.Severity == SeverityP0 {
-				// Abort subsequent gates per §7.3
-				break
-			}
-		case VerdictERROR:
-			seenERROR = true
-		case VerdictPARTIAL:
-			seenPARTIAL = true
+		if gr.Verdict.Value == VerdictNO && gate.Severity == SeverityP0 {
+			p0Failed = true
+			fmt.Fprintf(os.Stderr, "ratchet: aborting subsequent gates (P0 NO from %q)\n", gate.Name)
+			break gateLoop
 		}
 	}
+	_ = p0Failed
 
 	final := Aggregate(gateRuns)
 	r.transcript.Verdict = string(final.Value)
@@ -82,11 +74,17 @@ func (r *Runner) Run() Verdict {
 	r.transcript.JudgeKind = string(final.JudgeKind)
 	r.transcript.WallClockEnd = time.Now().UTC()
 	if err := r.transcript.Finalize(); err != nil {
+		// Spec §13.8: a FULL verdict MUST be reproducible from the published
+		// transcript. If we cannot persist the transcript, demote the verdict
+		// rather than silently emit a green that no third party can audit.
 		fmt.Fprintf(os.Stderr, "ratchet: transcript finalize failed: %v\n", err)
+		if final.Value == VerdictFULL || final.Value == VerdictPARTIAL {
+			final.Value = VerdictERROR
+			final.Reason = fmt.Sprintf("transcript finalize failed: %v", err)
+			final.VerdictSource = "transcript_failure"
+		}
 	}
 
-	_ = seenERROR
-	_ = seenPARTIAL
 	return final
 }
 
@@ -174,11 +172,18 @@ func (r *Runner) runScript(script string, gate Gate) Evidence {
 	err := cmd.Run()
 	exitCode := 0
 	if err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			exitCode = exitErr.ExitCode()
+		// Spec §8.1: timeout MUST yield ERROR, not NO.
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			exitCode = 3
 		} else {
-			exitCode = -1
+			var exitErr *exec.ExitError
+			if errors.As(err, &exitErr) {
+				exitCode = exitErr.ExitCode()
+			} else {
+				// Subprocess could not be launched / killed by signal.
+				// Treat as ERROR; the agent isn't responsible.
+				exitCode = 3
+			}
 		}
 	}
 	return Evidence{
@@ -283,11 +288,17 @@ func Aggregate(runs []GateRun) Verdict {
 	return final
 }
 
+// baseRef returns the git ref to diff against. Spec §15.3: the TDD gate
+// must compare HEAD against the merge-base with main/master, not HEAD~1.
+// Diffing against HEAD~1 is the gate-inverting bug from the v0.1 review:
+// a properly disciplined red-then-green commit sequence (test in HEAD~1,
+// prod in HEAD) would *fail* check_red because HEAD~1 already contains
+// the test.
 func (r *Runner) baseRef() string {
 	if r.opts.BaseRef != "" {
 		return r.opts.BaseRef
 	}
-	return "HEAD~1"
+	return gitsubstrate.BaseRef(r.repoRoot)
 }
 
 func nextAttemptNumber(repoRoot, taskID, gateName string) int {

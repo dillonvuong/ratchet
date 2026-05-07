@@ -15,6 +15,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -137,17 +138,27 @@ func canonicalEvent(name string) HookEvent {
 }
 
 // IsCompatibleCLIVersion compares the claude CLI version string to MinimumCLIVersion.
-// Versions are dotted SemVer; pre-release suffixes are ignored.
+// Versions are dotted SemVer; pre-release suffixes are ignored. An unparseable
+// version string returns false (refuse to proceed) — the prior behavior of
+// returning true on parse failure created a false-positive compatibility claim.
 func IsCompatibleCLIVersion(s string) bool {
-	have := strings.SplitN(strings.SplitN(s, "-", 2)[0], ".", 4)
+	core := strings.SplitN(s, "-", 2)[0]
+	have := strings.SplitN(core, ".", 4)
 	want := strings.SplitN(MinimumCLIVersion, ".", 4)
+	if len(have) < 2 {
+		return false
+	}
 	for i := 0; i < 3; i++ {
 		var hi, wi int
 		if i < len(have) {
-			fmt.Sscanf(have[i], "%d", &hi)
+			if _, err := fmt.Sscanf(have[i], "%d", &hi); err != nil {
+				return false
+			}
 		}
 		if i < len(want) {
-			fmt.Sscanf(want[i], "%d", &wi)
+			if _, err := fmt.Sscanf(want[i], "%d", &wi); err != nil {
+				return false
+			}
 		}
 		if hi > wi {
 			return true
@@ -157,6 +168,70 @@ func IsCompatibleCLIVersion(s string) bool {
 		}
 	}
 	return true
+}
+
+// VerifyCLIVersion attempts to discover the local claude CLI version and
+// verify it meets MinimumCLIVersion. Returns nil if compatible.
+//
+// Behavior:
+//   * If the env var `RATCHET_SKIP_HOST_CHECK=1` is set, returns nil.
+//   * If the env var `RATCHET_CLAUDE_CLI_VERSION` is set, uses that value
+//     directly (useful for CI and hook contexts where the host has injected it).
+//   * Otherwise attempts `claude --version` via PATH lookup. If `claude`
+//     is not on PATH, returns nil (operator may be running ratchet outside
+//     a Claude Code context — Codex, Cursor, CI). Only refuses when claude
+//     IS present and the version is too old.
+func VerifyCLIVersion() error {
+	if os.Getenv("RATCHET_SKIP_HOST_CHECK") == "1" {
+		return nil
+	}
+	if v := os.Getenv("RATCHET_CLAUDE_CLI_VERSION"); v != "" {
+		if !IsCompatibleCLIVersion(v) {
+			return fmt.Errorf("claude CLI version %q < minimum %q", v, MinimumCLIVersion)
+		}
+		return nil
+	}
+	bin, err := exec.LookPath("claude")
+	if err != nil {
+		// Not on PATH: ratchet is running outside Claude Code. No-op.
+		return nil
+	}
+	cmd := exec.Command(bin, "--version")
+	out, err := cmd.Output()
+	if err != nil {
+		// Couldn't ask the CLI; soft-fail rather than block.
+		return nil
+	}
+	// Output shapes seen in the wild:
+	//   "claude code 2.1.132 (Claude Code)"
+	//   "2.1.132"
+	// Extract the first dotted number.
+	v := extractVersion(string(out))
+	if v == "" {
+		return nil
+	}
+	if !IsCompatibleCLIVersion(v) {
+		return fmt.Errorf("claude CLI version %q < minimum %q (from %q)", v, MinimumCLIVersion, strings.TrimSpace(string(out)))
+	}
+	return nil
+}
+
+func extractVersion(s string) string {
+	// Find the first run of digits.dots.digits.
+	for i := 0; i < len(s); i++ {
+		if s[i] < '0' || s[i] > '9' {
+			continue
+		}
+		j := i
+		for j < len(s) && (s[j] == '.' || (s[j] >= '0' && s[j] <= '9') || s[j] == '-') {
+			j++
+		}
+		seg := s[i:j]
+		if strings.Contains(seg, ".") {
+			return seg
+		}
+	}
+	return ""
 }
 
 // StreamEvent is one JSONL record emitted by `claude --output-format stream-json`.

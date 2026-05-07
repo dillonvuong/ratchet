@@ -10,7 +10,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/dillon-vuong/ratchet/internal/adapter/claudecode"
 	"github.com/dillon-vuong/ratchet/internal/gitsubstrate"
@@ -115,6 +114,11 @@ func cmdRun(args []string) int {
 		}
 	}
 
+	if err := claudecode.VerifyCLIVersion(); err != nil {
+		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		return 1
+	}
+
 	if *taskID == "" {
 		*taskID = gitsubstrate.DeriveTaskID(".")
 	}
@@ -158,8 +162,18 @@ func cmdGate(args []string) int {
 		return 1
 	}
 
+	if err := cfg.Validate(specVersion); err != nil {
+		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		return 1
+	}
+
 	gate, err := cfg.FindGate(*gateName)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		return 1
+	}
+
+	if err := claudecode.VerifyCLIVersion(); err != nil {
 		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
 		return 1
 	}
@@ -227,7 +241,7 @@ func cmdFinalizeTranscript(args []string) int {
 	_ = args
 	// In v0.1, transcripts are finalized by the runner on Run() completion.
 	// This entry point exists for hook integration (Stop event).
-	if !strings.HasPrefix(os.Getenv("RATCHET_RUN_ID"), "") {
+	if os.Getenv("RATCHET_RUN_ID") == "" {
 		fmt.Fprintln(os.Stderr, "ratchet finalize-transcript: no active run")
 		return 0
 	}
@@ -235,5 +249,3 @@ func cmdFinalizeTranscript(args []string) int {
 	return 0
 }
 
-// Ensure adapter package is referenced so linker keeps it.
-var _ = claudecode.AdapterName
