@@ -32,15 +32,48 @@ type Reflection struct {
 }
 
 // ErrPathEscape is returned when a taskID or gateName would resolve to a
-// filesystem location outside repoRoot/.ratchet/reflections/. Spec §11.3
+// filesystem location outside repoRoot/.ratchet/reflections/, or when the
+// segments contain path separators / traversal components. Spec §11.3
 // Invariant 2: workspace path MUST stay inside workspace root. We extend
 // that invariant to reflection paths because they are co-located.
 var ErrPathEscape = errors.New("reflection path escapes repo reflections root")
 
+// validatePathSegment enforces spec §11.3 character set on a single
+// path component. Rejects empty strings, anything containing a path
+// separator, and the special components "." and "..".
+func validatePathSegment(name, s string) error {
+	if s == "" {
+		return fmt.Errorf("%w: %s is empty", ErrPathEscape, name)
+	}
+	if s == "." || s == ".." {
+		return fmt.Errorf("%w: %s=%q is a special path component", ErrPathEscape, name, s)
+	}
+	for _, r := range s {
+		switch {
+		case r >= 'A' && r <= 'Z',
+			r >= 'a' && r <= 'z',
+			r >= '0' && r <= '9',
+			r == '.' || r == '_' || r == '-':
+			continue
+		default:
+			return fmt.Errorf("%w: %s=%q contains disallowed character %q", ErrPathEscape, name, s, r)
+		}
+	}
+	return nil
+}
+
 // Write persists a Reflection to disk under repoRoot/.ratchet/reflections/...
-// Returns the absolute path written. Rejects taskID/gateName that traverse
-// outside the reflections root.
+// Returns the absolute path written. Rejects taskID/gateName that contain
+// path-traversal components or path separators. Spec §11.3: identifiers
+// MUST consist of [A-Za-z0-9._-] only; we extend the same constraint to
+// the reflection-path components.
 func Write(repoRoot, taskID, gateName string, attempt int, r Reflection) (string, error) {
+	if err := validatePathSegment("taskID", taskID); err != nil {
+		return "", err
+	}
+	if err := validatePathSegment("gateName", gateName); err != nil {
+		return "", err
+	}
 	root, err := filepath.Abs(filepath.Join(repoRoot, ".ratchet", "reflections"))
 	if err != nil {
 		return "", err
