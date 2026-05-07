@@ -17,13 +17,13 @@ The spec is the durable artifact. The Go binary in this repo is one reference im
 - **Pinned advisor quotes** — `docs/advisor-quotes.md`.
 - **References / bibliography** — `docs/references.md`.
 - **Doctrine prompt** — `ratchet.md`. The body that prepends to agents on first encounter.
-- **Active gates** — `.skills/<gate-name>/`.
+- **Active gates** — `skills/<gate-name>/`.
 - **Reflections directory** — `.ratchet/reflections/<task-id>/<gate-name>/<attempt>.md` (gitignored).
 - **Transcripts directory** — `.ratchet/transcripts/<task-id>/<run-id>.json`.
 
 ## Active gates
 
-- `tdd-red-green-refactor` (`P0`) — agent MUST produce a failing test before production code, then green, MUST NOT delete tests. See `.skills/tdd-red-green-refactor/SKILL.md`.
+- `tdd-red-green-refactor` (`P0`) — agent MUST produce a failing test before production code, then green, MUST NOT delete tests. See `skills/tdd-red-green-refactor/SKILL.md`.
 
 ## Build, run, test (this repo)
 
@@ -48,7 +48,7 @@ You are operating under ratchet. Before editing any production-code path matchin
 
 ## Cross-host notes
 
-ratchet works under Claude Code (v0). Codex App Server, Cursor, ACP, and A2A adapters are reserved for future versions. The repo contract (`ratchet.md` + `AGENTS.md` + `.skills/`) is portable across hosts; the adapter layer translates host-specific hooks into ratchet's gate dispatch.
+ratchet works under Claude Code (v0). Codex App Server, Cursor, ACP, and A2A adapters are reserved for future versions. The repo contract (`ratchet.md` + `AGENTS.md` + `skills/`) is portable across hosts; the adapter layer translates host-specific hooks into ratchet's gate dispatch.
 
 If you are an agent under a host without a ratchet adapter, the gates are still runnable as standalone subprocess calls: `ratchet gate --name=tdd-red-green-refactor --task=<task-id>`. The host-adapter layer adds automatic dispatch on tool-call events; without it, the run loop is manual.
 

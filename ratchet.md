@@ -60,8 +60,8 @@ permissions:
     - "Bash(git log:*)"
     - "Bash(git status:*)"
   deny:
-    - "Read(./.skills/**)"
-    - "Write(./.skills/**)"
+    - "Read(skills/**)"
+    - "Write(skills/**)"
     - "Read(./.ratchet/**)"
     - "Write(./.ratchet/**)"
 ---
@@ -110,7 +110,7 @@ When you retry, the most recent reflection for each failed gate is prepended to 
 - Edit a test you did not write in this turn. Tests authored by other agents or humans are immutable.
 - Delete a test. Ever. (Anthropic: "It is unacceptable to remove or edit tests.")
 - Skip the red phase. A test that already passes does not exercise new behavior.
-- Edit gate scripts at `.skills/<gate>/scripts/*`. The agent under test cannot grade itself.
+- Edit gate scripts at `skills/<gate>/scripts/*`. The agent under test cannot grade itself.
 - Read or write under `.ratchet/`. Reflections and transcripts are runner artifacts.
 - Claim the verdict. The runner produces verdicts; your output describes work, not its grade.
 

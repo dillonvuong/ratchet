@@ -68,7 +68,7 @@ jobs:
         run: go build -o ratchet ./cmd/ratchet
 
       - name: Make gate scripts executable
-        run: chmod +x .skills/tdd-red-green-refactor/scripts/*.sh
+        run: chmod +x skills/tdd-red-green-refactor/scripts/*.sh
 
       # The self-host check runs the TDD gate against the most recent commit.
       # On the initial commit there is no prior diff, so the gate is allowed

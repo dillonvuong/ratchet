@@ -66,7 +66,7 @@ type Gate struct {
 	Severity           Severity `yaml:"severity"`
 	RatchetSpecVersion string   `yaml:"ratchet_spec_version"`
 	Assumptions        []string `yaml:"assumptions"`
-	// Scripts is the ordered list of executables under .skills/<name>/scripts/.
+	// Scripts is the ordered list of executables under skills/<name>/scripts/.
 	// Populated by LoadSkill from the directory, sorted alphabetically.
 	Scripts []string `yaml:"-"`
 	// SkillRoot is the absolute path to the skill bundle directory.
@@ -140,7 +140,7 @@ type Config struct {
 	// ConfigPath is where this config was loaded from.
 	ConfigPath string `yaml:"-"`
 
-	// LoadedGates is the resolved list of Gates (after walking .skills/).
+	// LoadedGates is the resolved list of Gates (after walking skills/).
 	LoadedGates []Gate `yaml:"-"`
 }
 

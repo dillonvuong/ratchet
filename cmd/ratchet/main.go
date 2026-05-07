@@ -63,7 +63,7 @@ Usage:
       Events: PreToolUse | PostToolUse | Stop | PreCompact | PostCompact
 
   ratchet init [<dir>]
-      Scaffold ratchet.md, AGENTS.md, and .skills/tdd-red-green-refactor/
+      Scaffold ratchet.md, AGENTS.md, and skills/tdd-red-green-refactor/
       into the current or specified directory.
 
   ratchet version
@@ -211,8 +211,8 @@ func cmdInit(args []string) int {
 Required files (copy from this repository):
   ratchet.md                                    — frontmatter + doctrine
   AGENTS.md                                     — table-of-contents
-  .skills/tdd-red-green-refactor/SKILL.md       — first gate
-  .skills/tdd-red-green-refactor/scripts/*.sh   — gate scripts (chmod +x)
+  skills/tdd-red-green-refactor/SKILL.md       — first gate
+  skills/tdd-red-green-refactor/scripts/*.sh   — gate scripts (chmod +x)
 
 After scaffolding, run:
   ratchet run

@@ -89,7 +89,7 @@ func TestSanitize_Identity(t *testing.T) {
 
 func TestLoadConfig_RoundTrip(t *testing.T) {
 	dir := t.TempDir()
-	skill := filepath.Join(dir, ".skills", "tdd-red-green-refactor", "scripts")
+	skill := filepath.Join(dir, "skills", "tdd-red-green-refactor", "scripts")
 	if err := os.MkdirAll(skill, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,7 @@ assumptions:
 ---
 # Body
 `
-	if err := os.WriteFile(filepath.Join(dir, ".skills", "tdd-red-green-refactor", "SKILL.md"), []byte(skillMD), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "skills", "tdd-red-green-refactor", "SKILL.md"), []byte(skillMD), 0o644); err != nil {
 		t.Fatal(err)
 	}
 

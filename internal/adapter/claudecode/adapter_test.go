@@ -81,7 +81,7 @@ func TestWriteSettings(t *testing.T) {
 	perms := PermissionsSource{
 		Mode:  "acceptEdits",
 		Allow: []string{"Read(./**)"},
-		Deny:  []string{"Write(./.skills/**)"},
+		Deny:  []string{"Write(skills/**)"},
 	}
 	path, err := WriteSettings(dir, perms, hooks)
 	if err != nil {
@@ -104,7 +104,7 @@ func TestWriteSettings(t *testing.T) {
 	if len(got.Permissions.Allow) != 1 || got.Permissions.Allow[0] != "Read(./**)" {
 		t.Errorf("Allow = %+v", got.Permissions.Allow)
 	}
-	if len(got.Permissions.Deny) != 1 || got.Permissions.Deny[0] != "Write(./.skills/**)" {
+	if len(got.Permissions.Deny) != 1 || got.Permissions.Deny[0] != "Write(skills/**)" {
 		t.Errorf("Deny = %+v", got.Permissions.Deny)
 	}
 	// Both spellings should have been canonicalized to PreToolUse.

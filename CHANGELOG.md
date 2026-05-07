@@ -18,7 +18,7 @@ All notable changes to ratchet are documented here. Format follows [Keep a Chang
 - `docs/references.md` — living bibliography with Wayback recovery notes.
 - `AGENTS.md` — table-of-contents (~100 lines, per Lopopolo).
 - `ratchet.md` — frontmatter + doctrine prompt body.
-- `.skills/tdd-red-green-refactor/` — first gate with `SKILL.md` + `scripts/`.
+- `skills/tdd-red-green-refactor/` — first gate with `SKILL.md` + `scripts/`.
 - Go module + `cmd/ratchet/` CLI scaffold.
 - `internal/runner` — gate dispatch and verdict aggregation per spec §8.
 - `internal/adapter/claudecode` — Claude Code PreToolUse/PostToolUse hook integration.

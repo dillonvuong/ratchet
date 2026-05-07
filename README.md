@@ -54,12 +54,12 @@ go build -o ratchet ./cmd/ratchet
 ./ratchet version
 ```
 
-The `init` command writes `ratchet.md`, `AGENTS.md`, and `.skills/tdd-red-green-refactor/` into the current directory.
+The `init` command writes `ratchet.md`, `AGENTS.md`, and `skills/tdd-red-green-refactor/` into the current directory.
 
 ## What ships in v0.1
 
 - **Spec** (`docs/spec.md`) — Symphony-class normative document, RFC 2119, conformance matrix.
-- **TDD gate** (`.skills/tdd-red-green-refactor/`) — red/green/refactor with F2P/P2P semantics adopted from SWE-Bench.
+- **TDD gate** (`skills/tdd-red-green-refactor/`) — red/green/refactor with F2P/P2P semantics adopted from SWE-Bench.
 - **Claude Code adapter** (`internal/adapter/claudecode`) — PreToolUse/PostToolUse hooks, `.claude/settings.json` generation, `claude --output-format stream-json` consumption.
 - **Reflexion-shaped failure artifacts** (`.ratchet/reflections/`) — written on every non-FULL verdict, prepended to next attempt's prompt.
 - **METR/AISI-aligned transcripts** (`.ratchet/transcripts/`) — every required field for longitudinal analysis.

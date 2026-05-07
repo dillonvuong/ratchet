@@ -77,7 +77,7 @@ func (c *Config) Validate(runnerSpecVersion string) error {
 				gate.Name, gate.RatchetSpecVersion, runnerSpecVersion)
 		}
 		if len(gate.Scripts) == 0 {
-			return fmt.Errorf("gate %q has no scripts under .skills/%s/scripts/", gate.Name, gate.Name)
+			return fmt.Errorf("gate %q has no scripts under skills/%s/scripts/", gate.Name, gate.Name)
 		}
 	}
 	return nil
@@ -93,10 +93,10 @@ func (c *Config) FindGate(name string) (Gate, error) {
 	return Gate{}, fmt.Errorf("gate %q not declared in ratchet.md", name)
 }
 
-// LoadSkill walks .skills/<name>/ and returns a populated Gate.
+// LoadSkill walks skills/<name>/ and returns a populated Gate.
 // Spec §5.4.
 func LoadSkill(repoRoot string, ref GateRef) (Gate, error) {
-	dir := filepath.Join(repoRoot, ".skills", ref.Name)
+	dir := filepath.Join(repoRoot, "skills", ref.Name)
 	skillMD := filepath.Join(dir, "SKILL.md")
 	data, err := os.ReadFile(skillMD)
 	if err != nil {

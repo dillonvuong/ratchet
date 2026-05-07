@@ -23,7 +23,7 @@ Code-generation agents produce work whose quality is uneven and whose self-repor
 
 ratchet exists to close both problems by enforcing **hard, composable, deterministic verdicts** over agent output. Each verdict is a checkpoint with a binary outcome: nothing soft-passes. Gates are sequenced; failure of any gate fails the run. The first gate is red/green/refactor TDD: the agent MUST produce a failing test before production code, then make the test pass without breaking other tests, and MUST NOT delete or weaken existing tests.
 
-ratchet is intentionally portable. Its policy lives in `ratchet.md` and `AGENTS.md`; its gates live in `.skills/<gate-name>/`; its host integration is one thin adapter per host (Claude Code v0; Codex App Server, Cursor, ACP, A2A reserved). A user MUST be able to clone ratchet onto a new codebase or take it between employers without dependency on a specific vendor.
+ratchet is intentionally portable. Its policy lives in `ratchet.md` and `AGENTS.md`; its gates live in `skills/<gate-name>/`; its host integration is one thin adapter per host (Claude Code v0; Codex App Server, Cursor, ACP, A2A reserved). A user MUST be able to clone ratchet onto a new codebase or take it between employers without dependency on a specific vendor.
 
 ## 2. Goals and Non-Goals
 
@@ -31,7 +31,7 @@ ratchet is intentionally portable. Its policy lives in `ratchet.md` and `AGENTS.
 
 - Enforce **hard verdicts** over agent output via deterministic, externally-verifiable gates.
 - Sequence gates with a strict reducer: any failure fails the run; any regression collapses the verdict to `NO`.
-- Keep gate **policy in-repo** (`ratchet.md`, `.skills/`) so teams version their gates with their code.
+- Keep gate **policy in-repo** (`ratchet.md`, `skills/`) so teams version their gates with their code.
 - Define a **portable host-adapter protocol** so the same gate set works across Claude Code, Codex, Cursor, and any future host that respects the protocol.
 - Persist **Reflexion-shaped failure artifacts** (Shinn et al. 2023) so subsequent attempts can read prior reflections and avoid repeating mistakes.
 - Persist **METR/AISI-aligned structured transcripts** so longitudinal analysis (time-horizon, eval-awareness, reward-hacking detection) becomes possible without re-running.
@@ -56,7 +56,7 @@ ratchet is portable when kept in these layers. Each layer is replaceable; each g
 1. **Policy Layer** (repo-defined)
    - `ratchet.md` configuration + prompt body.
    - `AGENTS.md` table-of-contents into `docs/`.
-   - `.skills/<gate-name>/SKILL.md` per-gate definitions.
+   - `skills/<gate-name>/SKILL.md` per-gate definitions.
    - Team-specific rules for gate selection, ordering, severity thresholds.
 
 2. **Configuration Layer** (typed getters)
@@ -110,7 +110,7 @@ ratchet MUST NOT require Docker, Kubernetes, or a specific cloud provider.
 
 A `Gate` is a deterministic external verifier over agent output. Fields:
 
-- `name` (string) — `[a-z0-9-]`, 1–64 chars, no leading/trailing/consecutive hyphens, MUST equal the parent directory name in `.skills/<name>/`.
+- `name` (string) — `[a-z0-9-]`, 1–64 chars, no leading/trailing/consecutive hyphens, MUST equal the parent directory name in `skills/<name>/`.
 - `description` (string) — what + when, 1–1024 chars.
 - `severity` (enum: `P0` | `P1` | `P2`) — `P0` failures are unrecoverable; `P1` failures fail the run with retry permitted; `P2` failures are advisory and recorded but do not fail the run.
 - `scripts` (list) — ordered list of executables under `scripts/`. Verdict aggregation per §9.
@@ -198,7 +198,7 @@ A repository using ratchet MUST contain:
 
 - `ratchet.md` — configuration + doctrine prompt body (§5.2).
 - `AGENTS.md` — table-of-contents into `docs/` (§5.3).
-- `.skills/<gate-name>/SKILL.md` for each active gate (§5.4).
+- `skills/<gate-name>/SKILL.md` for each active gate (§5.4).
 
 A repository using ratchet SHOULD contain:
 
@@ -248,7 +248,7 @@ Parsing rules:
 
 ### 5.3 `AGENTS.md` Format
 
-Per Lopopolo's verbatim rule: `AGENTS.md` is a **table-of-contents**, not an encyclopedia. Target ~100 lines. It MUST link out to `docs/` and `.skills/` rather than inlining content.
+Per Lopopolo's verbatim rule: `AGENTS.md` is a **table-of-contents**, not an encyclopedia. Target ~100 lines. It MUST link out to `docs/` and `skills/` rather than inlining content.
 
 `AGENTS.md` MUST be standard Markdown with no required frontmatter (matching the open AGENTS.md standard at agents.md). Closest-file-wins precedence applies for nested AGENTS.md within a repository.
 
@@ -257,7 +257,7 @@ Per Lopopolo's verbatim rule: `AGENTS.md` is a **table-of-contents**, not an enc
 Each gate is a skill bundle:
 
 ```
-.skills/<gate-name>/
+skills/<gate-name>/
 ├── SKILL.md            # YAML frontmatter (name, description, severity, ratchet_spec_version)
 └── scripts/
     └── <executable>    # exit code 0 = pass; non-zero = fail; stderr = reason
@@ -300,7 +300,7 @@ Environment variables MUST NOT globally override YAML values. They MAY only be s
 
 - Invalid front matter MUST fail startup with an operator-visible error.
 - Unknown top-level keys SHOULD be ignored for forward compatibility.
-- A gate referenced by `gates:` whose `.skills/<name>/SKILL.md` does not exist MUST fail validation.
+- A gate referenced by `gates:` whose `skills/<name>/SKILL.md` does not exist MUST fail validation.
 - A `ratchet_spec_version` outside the runner's compatibility range MUST fail validation.
 
 ### 6.3 Dynamic Reload (Reserved for v1+)
@@ -526,7 +526,7 @@ Implementations SHOULD reserve a fraction of every run for **honeypot probes**: 
 
 The agent under test MUST NOT be able to read or write:
 
-- Gate scripts (`.skills/<gate-name>/scripts/*`).
+- Gate scripts (`skills/<gate-name>/scripts/*`).
 - Gate evidence (`.ratchet/evidence/`).
 - Reflection artifacts of the current run (until written and frozen).
 - Transcript files (until finalized).
@@ -795,7 +795,7 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 
 - [ ] `ratchet.md` parser with frontmatter + body split.
 - [ ] `AGENTS.md` discovery (closest-file-wins).
-- [ ] Skill bundle loader (`.skills/<name>/SKILL.md`).
+- [ ] Skill bundle loader (`skills/<name>/SKILL.md`).
 - [ ] Settings precedence (user/project/local).
 - [ ] Gate dispatch in declared order with severity-aware abort.
 - [ ] Verdict aggregation per §8.
@@ -808,7 +808,7 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 
 ### 17.2 v0.1 TDD Gate
 
-- [ ] `.skills/tdd-red-green-refactor/SKILL.md` with REQUIRED frontmatter.
+- [ ] `skills/tdd-red-green-refactor/SKILL.md` with REQUIRED frontmatter.
 - [ ] `scripts/check_red.sh`, `check_green.sh`, `check_immutable.sh`.
 - [ ] F2P/P2P semantics implemented.
 - [ ] Test matrix §16.7 passing.
@@ -837,7 +837,7 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 - **Workspace**: per-task filesystem boundary in which gate scripts run.
 - **Hard verdict**: a verdict that cannot be soft-passed; a regression collapses to NO.
 - **Honeypot**: an input designed to detect deceptive or eval-aware behavior, off-distribution from the standard task corpus.
-- **Skill bundle**: `.skills/<gate-name>/` directory containing `SKILL.md` and `scripts/`.
+- **Skill bundle**: `skills/<gate-name>/` directory containing `SKILL.md` and `scripts/`.
 - **Adapter**: a host-specific shim translating between the host's hook mechanism and ratchet's gate dispatch.
 - **Brain / Hands / Session**: the stateless-harness / interchangeable-sandbox / append-only-event-log triad reserved for v1+ implementations (Anthropic Managed Agents, Apr 2026).
 

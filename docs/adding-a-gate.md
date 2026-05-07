@@ -4,10 +4,10 @@ This is the practical tutorial. The normative contract for skill bundles lives i
 
 ## The shape of a gate
 
-A gate is a directory under `.skills/` containing a `SKILL.md` and a `scripts/` folder.
+A gate is a directory under `skills/` containing a `SKILL.md` and a `scripts/` folder.
 
 ```
-.skills/<gate-name>/
+skills/<gate-name>/
 ├── SKILL.md
 └── scripts/
     └── <executable>
@@ -103,7 +103,7 @@ Per spec §16, every gate that ships a non-trivial verdict computation MUST have
 - Idempotence: the gate does not modify the workspace.
 - Reason-string stability: failure reasons are not random.
 
-Place tests at `.skills/<gate-name>/test/` or in your normal test directory. The runner's self-test (§17.4) will pick them up.
+Place tests at `skills/<gate-name>/test/` or in your normal test directory. The runner's self-test (§17.4) will pick them up.
 
 ## Step 5: run ratchet on ratchet
 
