@@ -158,7 +158,14 @@ func (r *Runner) runScript(script string, gate Gate) Evidence {
 	startedAt := time.Now()
 	cmd := exec.CommandContext(ctx, script, r.repoRoot)
 	cmd.Dir = r.repoRoot
-	cmd.Env = append(os.Environ(),
+	// Spec §13.5 (grader isolation): scrub library-injection vectors so the
+	// agent under test cannot intercept gate-script subprocess execution by
+	// planting a shared library and pointing LD_PRELOAD at it. PATH stays
+	// because gate scripts must locate git/go/etc.; future versions SHOULD
+	// pin a workspace-PATH allowlist (see docs/maintenance.md quarterly
+	// review). Defense in depth: workspace also has Read(./skills/**) +
+	// Write(./skills/**) deny rules in the Claude Code permission grammar.
+	cmd.Env = append(scrubInjectionEnv(os.Environ()),
 		"RATCHET_TASK_ID="+r.taskID,
 		"RATCHET_BASE_REF="+r.baseRef(),
 		"RATCHET_PROD_CODE_GLOBS="+strings.Join(r.cfg.Workspace.ProdCodeGlobs, ":"),
@@ -294,6 +301,46 @@ func Aggregate(runs []GateRun) Verdict {
 // a properly disciplined red-then-green commit sequence (test in HEAD~1,
 // prod in HEAD) would *fail* check_red because HEAD~1 already contains
 // the test.
+// scrubInjectionEnv removes LD_PRELOAD, LD_LIBRARY_PATH, DYLD_*, and any
+// other shared-library-injection vectors from the inherited env before
+// passing it to gate-script subprocesses. Spec §13.5.
+//
+// This is partial defense. A complete grader-isolation implementation
+// would also pin PATH to a workspace-independent allowlist and run gates
+// in a sandbox (Docker/firejail/macOS sandbox-exec). Tracked for v0.2.
+func scrubInjectionEnv(env []string) []string {
+	dropPrefixes := []string{
+		"LD_PRELOAD=",
+		"LD_LIBRARY_PATH=",
+		"LD_AUDIT=",
+		"LD_BIND_NOW=",
+		"DYLD_INSERT_LIBRARIES=",
+		"DYLD_LIBRARY_PATH=",
+		"DYLD_FRAMEWORK_PATH=",
+		"DYLD_FALLBACK_LIBRARY_PATH=",
+		"DYLD_FALLBACK_FRAMEWORK_PATH=",
+		"DYLD_VERSIONED_LIBRARY_PATH=",
+		"DYLD_VERSIONED_FRAMEWORK_PATH=",
+		"DYLD_PRINT_LIBRARIES=",
+		"GIT_EXEC_PATH=",
+		"GIT_TEMPLATE_DIR=",
+		"GIT_DIR=",
+		"GIT_WORK_TREE=",
+		"GIT_INDEX_FILE=",
+	}
+	out := make([]string, 0, len(env))
+loop:
+	for _, kv := range env {
+		for _, p := range dropPrefixes {
+			if strings.HasPrefix(kv, p) {
+				continue loop
+			}
+		}
+		out = append(out, kv)
+	}
+	return out
+}
+
 func (r *Runner) baseRef() string {
 	if r.opts.BaseRef != "" {
 		return r.opts.BaseRef

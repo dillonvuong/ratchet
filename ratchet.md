@@ -8,14 +8,18 @@ gates:
     severity: P0
 
 hooks:
-  PreToolUse:
-    - matcher: "Write|Edit"
-      command: "ratchet gate --on=PreToolUse --gate=tdd-red-green-refactor"
-      timeoutSec: 30
+  # PostToolUse-only for the TDD gate. Earlier drafts also bound PreToolUse,
+  # but that doubled gate execution per tool call (Cherny <5s pre-commit
+  # rule violation) and PreToolUse cannot verify a diff that hasn't been
+  # written yet. Recall happens at SessionStart instead.
   PostToolUse:
     - matcher: "Write|Edit"
       command: "ratchet gate --on=PostToolUse --gate=tdd-red-green-refactor"
-      timeoutSec: 30
+      timeoutSec: 60
+  SessionStart:
+    - matcher: "*"
+      command: "ratchet recall"
+      timeoutSec: 5
   Stop:
     - matcher: "*"
       command: "ratchet finalize-transcript"
@@ -96,7 +100,7 @@ If a gate verdict is non-FULL, a Reflexion-shaped artifact is written to `.ratch
 - The observation (what the gate saw, with concrete evidence — file paths, test names).
 - A suggested next action.
 
-When you retry, the most recent reflection for each failed gate is prepended to your prompt. Read it. The point of the reflection is to break the loop where the same mistake repeats.
+The next session prepends the most recent reflection for each failed gate via the `SessionStart` hook (`ratchet recall`). You will see it as additional context before you act. You can also call `ratchet recall` manually at any point to re-read the latest observations. The point of the reflection is to break the loop where the same mistake repeats; an attempt that ignores its own prior reflection is wasted compute.
 
 ## What you may do
 
@@ -116,19 +120,27 @@ When you retry, the most recent reflection for each failed gate is prepended to 
 
 ## First action of every session
 
-Run the tests. (Willison's lever: it discovers the test runner, reveals scope, and puts you in the right mindset.) For example:
+1. **Recall prior gate failures** for the current task:
 
-```
-go test ./...
-```
+   ```
+   ratchet recall
+   ```
 
-```
-pytest
-```
+   This prints the latest Reflexion-shaped observation for each gate that failed in this task's history. If output is non-empty, read it before doing anything else. An attempt that ignores its own prior reflection is wasted compute. The `SessionStart` hook in `ratchet.md` runs this automatically, but you can re-invoke at any point.
 
-```
-npm test
-```
+2. **Run the tests.** (Willison's lever: it discovers the test runner, reveals scope, and puts you in the right mindset.) For example:
+
+   ```
+   go test ./...
+   ```
+
+   ```
+   pytest
+   ```
+
+   ```
+   npm test
+   ```
 
 If the test layout is non-obvious, read `AGENTS.md` and `docs/spec.md` first.
 

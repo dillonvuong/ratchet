@@ -83,6 +83,8 @@ func TestCanonicalEvent(t *testing.T) {
 		{"stop", Stop},
 		{"PreCompact", PreCompact},
 		{"PostCompact", PostCompact},
+		{"SessionStart", SessionStart},
+		{"session_start", SessionStart},
 	}
 	for _, c := range cases {
 		if got := canonicalEvent(c.in); got != c.want {

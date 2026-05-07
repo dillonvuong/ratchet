@@ -30,6 +30,7 @@ The spec is the durable artifact. The Go binary in this repo is one reference im
 - Build: `go build -o ratchet ./cmd/ratchet`
 - Test: `go test ./...`
 - Run on this repo: `./ratchet run`
+- Recall prior gate failures: `./ratchet recall` (run this at the start of every session)
 - Self-hosted CI: see `.github/workflows/ci.yml`. ratchet runs ratchet on its own commits.
 
 ## Doctrine (one paragraph)

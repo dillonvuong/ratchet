@@ -13,6 +13,7 @@ import (
 
 	"github.com/dillon-vuong/ratchet/internal/adapter/claudecode"
 	"github.com/dillon-vuong/ratchet/internal/gitsubstrate"
+	"github.com/dillon-vuong/ratchet/internal/reflections"
 	"github.com/dillon-vuong/ratchet/internal/runner"
 )
 
@@ -35,6 +36,8 @@ func main() {
 		os.Exit(cmdRun(args))
 	case "gate":
 		os.Exit(cmdGate(args))
+	case "recall":
+		os.Exit(cmdRecall(args))
 	case "init":
 		os.Exit(cmdInit(args))
 	case "version", "--version", "-v":
@@ -60,6 +63,11 @@ Usage:
   ratchet gate --name <gate-name> [--on <event>] [--task <id>]
       Run a single named gate. Used by host adapters from hook events.
       Events: PreToolUse | PostToolUse | Stop | PreCompact | PostCompact
+
+  ratchet recall [--task <id>] [--gate <name>]
+      Print the latest reflection(s) for the current task. Closes the
+      anterograde-amnesia loop (spec §10): the agent runs this at session
+      start so prior failure observations re-enter context.
 
   ratchet init [<dir>]
       Scaffold ratchet.md, AGENTS.md, and skills/tdd-red-green-refactor/
@@ -201,6 +209,57 @@ func cmdGate(args []string) int {
 	default:
 		return 1
 	}
+}
+
+// cmdRecall surfaces the most recent reflection for each (or one) gate.
+// Spec §10: prior failures inform the next attempt. Print to stdout so the
+// agent can read it directly, or be invoked from a SessionStart /
+// UserPromptSubmit hook to inject context before the agent acts.
+func cmdRecall(args []string) int {
+	fs := flag.NewFlagSet("recall", flag.ExitOnError)
+	taskID := fs.String("task", "", "task identifier (default: derived from git branch)")
+	gateName := fs.String("gate", "", "specific gate (default: all gates with reflections)")
+	_ = fs.Parse(args)
+
+	if *taskID == "" {
+		*taskID = gitsubstrate.DeriveTaskID(".")
+	}
+
+	repoRoot, err := filepath.Abs(".")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		return 1
+	}
+
+	taskDir := filepath.Join(repoRoot, ".ratchet", "reflections", *taskID)
+	entries, err := os.ReadDir(taskDir)
+	if err != nil {
+		// No reflections yet — nothing to recall is a clean state, not an error.
+		return 0
+	}
+
+	any := false
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		if *gateName != "" && e.Name() != *gateName {
+			continue
+		}
+		body := reflections.LatestForGateBody(repoRoot, *taskID, e.Name())
+		if body == "" {
+			continue
+		}
+		if any {
+			fmt.Println()
+			fmt.Println("---")
+			fmt.Println()
+		}
+		fmt.Printf("# Latest reflection: gate=%s task=%s\n\n", e.Name(), *taskID)
+		fmt.Println(body)
+		any = true
+	}
+	return 0
 }
 
 func cmdInit(args []string) int {

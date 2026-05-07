@@ -30,11 +30,12 @@ const MinimumCLIVersion = "2.1.0"
 type HookEvent string
 
 const (
-	PreToolUse  HookEvent = "PreToolUse"
-	PostToolUse HookEvent = "PostToolUse"
-	Stop        HookEvent = "Stop"
-	PreCompact  HookEvent = "PreCompact"
-	PostCompact HookEvent = "PostCompact"
+	PreToolUse   HookEvent = "PreToolUse"
+	PostToolUse  HookEvent = "PostToolUse"
+	Stop         HookEvent = "Stop"
+	PreCompact   HookEvent = "PreCompact"
+	PostCompact  HookEvent = "PostCompact"
+	SessionStart HookEvent = "SessionStart"
 )
 
 // HookEntry is the JSON shape Claude Code expects in .claude/settings.json
@@ -131,6 +132,8 @@ func canonicalEvent(name string) HookEvent {
 		return PreCompact
 	case "postcompact", "post_compact":
 		return PostCompact
+	case "sessionstart", "session_start":
+		return SessionStart
 	default:
 		// Pass through unrecognized; user is responsible.
 		return HookEvent(name)
