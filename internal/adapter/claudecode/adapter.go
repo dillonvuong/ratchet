@@ -95,16 +95,14 @@ func WriteSettings(repoRoot string, perms PermissionsSource, hooks map[string][]
 	}
 	for ev, list := range hooks {
 		canonical := string(canonicalEvent(ev))
-		var entries []HookEntry
 		for _, h := range list {
-			entries = append(entries, HookEntry{
+			out.Hooks[canonical] = append(out.Hooks[canonical], HookEntry{
 				Matcher: h.Matcher,
 				Hooks: []HookCommand{
 					{Type: "command", Command: h.Command, TimeoutSec: h.TimeoutSec},
 				},
 			})
 		}
-		out.Hooks[canonical] = entries
 	}
 
 	data, err := json.MarshalIndent(out, "", "  ")
