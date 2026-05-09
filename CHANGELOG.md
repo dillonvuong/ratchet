@@ -1,12 +1,23 @@
 # Changelog
 
-All notable changes to ratchet are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning per `docs/maintenance.md`.
+All notable changes to maxwell are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning per `docs/maintenance.md`.
 
 ## [Unreleased]
 
+### Changed (BREAKING — pre-stable)
+- Renamed project from `ratchet` to `maxwell`. Repo moved to `github.com/dillonvuong/maxwell`. Internal renames in this commit:
+  - Module path: `github.com/dillon-vuong/ratchet` → `github.com/dillonvuong/maxwell`.
+  - Binary directory: `cmd/ratchet/` → `cmd/maxwell/` (binary name `maxwell`).
+  - Doctrine file: `ratchet.md` → `maxwell.md`.
+  - Frontmatter key in `maxwell.md` and every `SKILL.md`: `ratchet_spec_version` → `maxwell_spec_version`.
+  - Runtime artifact directory: `.ratchet/` → `.maxwell/` (reflections, transcripts, evidence, settings).
+  - Gate-script env vars: `RATCHET_*` → `MAXWELL_*` (`MAXWELL_TASK_ID`, `MAXWELL_BASE_REF`, `MAXWELL_PROD_CODE_GLOBS`, `MAXWELL_TEST_GLOBS`, `MAXWELL_TEST_RUNNER`, `MAXWELL_F2P_TESTS`, `MAXWELL_P2P_TESTS`, `MAXWELL_RUN_ID`, `MAXWELL_SKIP_HOST_CHECK`, `MAXWELL_CLAUDE_CLI_VERSION`).
+  - Transcript JSON field: `ratchet_spec_version` → `maxwell_spec_version`. `harness_version` value: `ratchet-0.1.0-alpha` → `maxwell-0.1.0-alpha`.
+  - CLI commands: `ratchet run|gate|recall|init|version|finalize-transcript` → `maxwell ...`.
+
 ### Added
-- `ratchet recall` subcommand — prints the latest reflection for each (or one) gate of the current task. Closes the anterograde-amnesia loop the v0.1 review surfaced.
-- `SessionStart` hook in `ratchet.md` invokes `ratchet recall` so prior failures re-enter context automatically.
+- `maxwell recall` subcommand — prints the latest reflection for each (or one) gate of the current task. Closes the anterograde-amnesia loop the v0.1 review surfaced.
+- `SessionStart` hook in `maxwell.md` invokes `maxwell recall` so prior failures re-enter context automatically.
 - `LatestForGateBody` helper in `internal/reflections`.
 - `VerifyCLIVersion` in `internal/adapter/claudecode` — runtime CLI version check; was helper-only before.
 - `scrubInjectionEnv` in `internal/runner` — strips LD_PRELOAD/DYLD_*/GIT_* before launching gate scripts (spec §13.5 partial).
@@ -39,15 +50,15 @@ All notable changes to ratchet are documented here. Format follows [Keep a Chang
 - `docs/maintenance.md` — versioning, deprecation, RFC process, quarterly review protocol.
 - `docs/references.md` — living bibliography with Wayback recovery notes.
 - `AGENTS.md` — table-of-contents (~100 lines, per Lopopolo).
-- `ratchet.md` — frontmatter + doctrine prompt body.
+- `maxwell.md` — frontmatter + doctrine prompt body.
 - `skills/tdd-red-green-refactor/` — first gate with `SKILL.md` + `scripts/`.
-- Go module + `cmd/ratchet/` CLI scaffold.
+- Go module + `cmd/maxwell/` CLI scaffold.
 - `internal/runner` — gate dispatch and verdict aggregation per spec §8.
 - `internal/adapter/claudecode` — Claude Code PreToolUse/PostToolUse hook integration.
 - `internal/gitsubstrate` — git-topology verdict primitives.
 - `internal/reflections` — Reflexion artifact writer per spec §10.
 - `internal/transcripts` — METR/AISI structured transcript emitter per spec §15.
-- `.github/workflows/ci.yml` — self-hosting CI; ratchet runs ratchet on its own commits.
+- `.github/workflows/ci.yml` — self-hosting CI; maxwell runs maxwell on its own commits.
 
 ### Pinned commitments
 
@@ -57,5 +68,5 @@ All notable changes to ratchet are documented here. Format follows [Keep a Chang
 - Self-judgment: `forbidden`. No LLM-judged primary verdicts (per spec §13.1).
 - License: Apache 2.0.
 
-[Unreleased]: https://github.com/dillon-vuong/ratchet/compare/v0.1.0-alpha...HEAD
-[0.1.0-alpha]: https://github.com/dillon-vuong/ratchet/releases/tag/v0.1.0-alpha
+[Unreleased]: https://github.com/dillonvuong/maxwell/compare/v0.1.0-alpha...HEAD
+[0.1.0-alpha]: https://github.com/dillonvuong/maxwell/releases/tag/v0.1.0-alpha

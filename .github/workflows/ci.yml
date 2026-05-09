@@ -40,15 +40,15 @@ jobs:
         run: go test -v -race ./...
 
       - name: Build release binary
-        run: go build -o ratchet ./cmd/ratchet
+        run: go build -o maxwell ./cmd/maxwell
 
       - name: Sanity check
         run: |
-          ./ratchet version
-          ./ratchet help
+          ./maxwell version
+          ./maxwell help
 
   self-host:
-    name: ratchet runs ratchet
+    name: maxwell runs maxwell
     runs-on: ubuntu-latest
     needs: build-test
     timeout-minutes: 10
@@ -64,8 +64,8 @@ jobs:
           go-version: '1.22'
           check-latest: true
 
-      - name: Build ratchet
-        run: go build -o ratchet ./cmd/ratchet
+      - name: Build maxwell
+        run: go build -o maxwell ./cmd/maxwell
 
       - name: Make gate scripts executable
         run: chmod +x skills/tdd-red-green-refactor/scripts/*.sh
@@ -75,8 +75,8 @@ jobs:
       # to no-op (no prod-code changes detected → status=pass).
       - name: Run TDD gate against HEAD
         run: |
-          ./ratchet gate --name=tdd-red-green-refactor --task=ci-${{ github.sha }} || verdict=$?
-          echo "ratchet exit code: ${verdict:-0}"
+          ./maxwell gate --name=tdd-red-green-refactor --task=ci-${{ github.sha }} || verdict=$?
+          echo "maxwell exit code: ${verdict:-0}"
 
   conformance:
     name: conformance report

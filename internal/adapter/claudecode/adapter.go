@@ -1,11 +1,11 @@
 // Package claudecode is the Claude Code host adapter (spec §10.2).
 //
 // The adapter:
-//   * Generates .claude/settings.json from ratchet.md's permissions and hooks.
+//   * Generates .claude/settings.json from maxwell.md's permissions and hooks.
 //   * Pins the minimum claude CLI version (2.1.0).
 //   * Consumes `claude --output-format stream-json` JSONL events.
 //   * Translates host hook events (PreToolUse, PostToolUse, Stop, PreCompact,
-//     PostCompact) into ratchet gate dispatches.
+//     PostCompact) into maxwell gate dispatches.
 //
 // Hook event names match the claude-agent-sdk PascalCase canon exactly.
 // Permission grammar uses the `Tool(pattern)` form.
@@ -52,7 +52,7 @@ type HookCommand struct {
 	TimeoutSec int    `json:"timeoutSec,omitempty"`
 }
 
-// Settings models the subset of .claude/settings.json that ratchet writes.
+// Settings models the subset of .claude/settings.json that maxwell writes.
 type Settings struct {
 	Permissions    SettingsPermissions       `json:"permissions"`
 	Hooks          map[string][]HookEntry    `json:"hooks,omitempty"`
@@ -65,14 +65,14 @@ type SettingsPermissions struct {
 	Deny  []string `json:"deny,omitempty"`
 }
 
-// HookSourceConfig is the input shape coming from ratchet.md frontmatter.
+// HookSourceConfig is the input shape coming from maxwell.md frontmatter.
 type HookSourceConfig struct {
 	Matcher    string
 	Command    string
 	TimeoutSec int
 }
 
-// PermissionsSource is the input from ratchet.md frontmatter.
+// PermissionsSource is the input from maxwell.md frontmatter.
 type PermissionsSource struct {
 	Mode  string
 	Allow []string
@@ -119,7 +119,7 @@ func WriteSettings(repoRoot string, perms PermissionsSource, hooks map[string][]
 }
 
 // canonicalEvent normalizes an incoming event name to the spec's PascalCase canon.
-// Tolerant of snake_case input from ratchet.md but emits PascalCase to settings.json.
+// Tolerant of snake_case input from maxwell.md but emits PascalCase to settings.json.
 func canonicalEvent(name string) HookEvent {
 	switch strings.ToLower(name) {
 	case "pretooluse", "pre_tool_use":
@@ -177,18 +177,18 @@ func IsCompatibleCLIVersion(s string) bool {
 // verify it meets MinimumCLIVersion. Returns nil if compatible.
 //
 // Behavior:
-//   * If the env var `RATCHET_SKIP_HOST_CHECK=1` is set, returns nil.
-//   * If the env var `RATCHET_CLAUDE_CLI_VERSION` is set, uses that value
+//   * If the env var `MAXWELL_SKIP_HOST_CHECK=1` is set, returns nil.
+//   * If the env var `MAXWELL_CLAUDE_CLI_VERSION` is set, uses that value
 //     directly (useful for CI and hook contexts where the host has injected it).
 //   * Otherwise attempts `claude --version` via PATH lookup. If `claude`
-//     is not on PATH, returns nil (operator may be running ratchet outside
+//     is not on PATH, returns nil (operator may be running maxwell outside
 //     a Claude Code context — Codex, Cursor, CI). Only refuses when claude
 //     IS present and the version is too old.
 func VerifyCLIVersion() error {
-	if os.Getenv("RATCHET_SKIP_HOST_CHECK") == "1" {
+	if os.Getenv("MAXWELL_SKIP_HOST_CHECK") == "1" {
 		return nil
 	}
-	if v := os.Getenv("RATCHET_CLAUDE_CLI_VERSION"); v != "" {
+	if v := os.Getenv("MAXWELL_CLAUDE_CLI_VERSION"); v != "" {
 		if !IsCompatibleCLIVersion(v) {
 			return fmt.Errorf("claude CLI version %q < minimum %q", v, MinimumCLIVersion)
 		}
@@ -196,7 +196,7 @@ func VerifyCLIVersion() error {
 	}
 	bin, err := exec.LookPath("claude")
 	if err != nil {
-		// Not on PATH: ratchet is running outside Claude Code. No-op.
+		// Not on PATH: maxwell is running outside Claude Code. No-op.
 		return nil
 	}
 	cmd := exec.Command(bin, "--version")

@@ -2,7 +2,7 @@
 
 This is the table of contents. The full content lives elsewhere; this file is intentionally short (per Lopopolo: "Context is a scarce resource. Too much guidance becomes non-guidance.").
 
-## What ratchet is
+## What maxwell is
 
 A host-agnostic harness for code-generation agents. Enforces composable, hard-verdict gates over agent output. First-class gate is red/green/refactor TDD on a git-topology substrate.
 
@@ -10,16 +10,16 @@ The spec is the durable artifact. The Go binary in this repo is one reference im
 
 ## Where to look
 
-- **The spec** — `docs/spec.md`. RFC 2119 normative. Read first if you are an agent encountering ratchet.
+- **The spec** — `docs/spec.md`. RFC 2119 normative. Read first if you are an agent encountering maxwell.
 - **Why TDD is the first gate** — `docs/why-tdd-first.md`.
 - **Adding a gate** — `docs/adding-a-gate.md`.
 - **Spec maintenance protocol** — `docs/maintenance.md`.
 - **Pinned advisor quotes** — `docs/advisor-quotes.md`.
 - **References / bibliography** — `docs/references.md`.
-- **Doctrine prompt** — `ratchet.md`. The body that prepends to agents on first encounter.
+- **Doctrine prompt** — `maxwell.md`. The body that prepends to agents on first encounter.
 - **Active gates** — `skills/<gate-name>/`.
-- **Reflections directory** — `.ratchet/reflections/<task-id>/<gate-name>/<attempt>.md` (gitignored).
-- **Transcripts directory** — `.ratchet/transcripts/<task-id>/<run-id>.json`.
+- **Reflections directory** — `.maxwell/reflections/<task-id>/<gate-name>/<attempt>.md` (gitignored).
+- **Transcripts directory** — `.maxwell/transcripts/<task-id>/<run-id>.json`.
 
 ## Active gates
 
@@ -27,15 +27,15 @@ The spec is the durable artifact. The Go binary in this repo is one reference im
 
 ## Build, run, test (this repo)
 
-- Build: `go build -o ratchet ./cmd/ratchet`
+- Build: `go build -o maxwell ./cmd/maxwell`
 - Test: `go test ./...`
-- Run on this repo: `./ratchet run`
-- Recall prior gate failures: `./ratchet recall` (run this at the start of every session)
-- Self-hosted CI: see `.github/workflows/ci.yml`. ratchet runs ratchet on its own commits.
+- Run on this repo: `./maxwell run`
+- Recall prior gate failures: `./maxwell recall` (run this at the start of every session)
+- Self-hosted CI: see `.github/workflows/ci.yml`. maxwell runs maxwell on its own commits.
 
 ## Doctrine (one paragraph)
 
-You are operating under ratchet. Before editing any production-code path matching `src/**`, `lib/**`, `internal/**`, or `pkg/**`, you MUST add a failing test that exercises the new behavior. After the production edit, the test MUST pass and no previously-passing test MUST regress. You MUST NOT delete or weaken existing tests. The verdict is computed from `git diff` against the base ref plus the test runner's exit codes; there is no model in the verdict loop. If a gate fails, you will receive a Reflexion-shaped artifact at `.ratchet/reflections/<task-id>/<gate>/<attempt>.md` describing the observation and a suggested next action; read it before retrying. See `ratchet.md` for the full doctrine.
+You are operating under maxwell. Before editing any production-code path matching `src/**`, `lib/**`, `internal/**`, or `pkg/**`, you MUST add a failing test that exercises the new behavior. After the production edit, the test MUST pass and no previously-passing test MUST regress. You MUST NOT delete or weaken existing tests. The verdict is computed from `git diff` against the base ref plus the test runner's exit codes; there is no model in the verdict loop. If a gate fails, you will receive a Reflexion-shaped artifact at `.maxwell/reflections/<task-id>/<gate>/<attempt>.md` describing the observation and a suggested next action; read it before retrying. See `maxwell.md` for the full doctrine.
 
 ## House rules
 
@@ -49,9 +49,9 @@ You are operating under ratchet. Before editing any production-code path matchin
 
 ## Cross-host notes
 
-ratchet works under Claude Code (v0). Codex App Server, Cursor, ACP, and A2A adapters are reserved for future versions. The repo contract (`ratchet.md` + `AGENTS.md` + `skills/`) is portable across hosts; the adapter layer translates host-specific hooks into ratchet's gate dispatch.
+maxwell works under Claude Code (v0). Codex App Server, Cursor, ACP, and A2A adapters are reserved for future versions. The repo contract (`maxwell.md` + `AGENTS.md` + `skills/`) is portable across hosts; the adapter layer translates host-specific hooks into maxwell's gate dispatch.
 
-If you are an agent under a host without a ratchet adapter, the gates are still runnable as standalone subprocess calls: `ratchet gate --name=tdd-red-green-refactor --task=<task-id>`. The host-adapter layer adds automatic dispatch on tool-call events; without it, the run loop is manual.
+If you are an agent under a host without a maxwell adapter, the gates are still runnable as standalone subprocess calls: `maxwell gate --name=tdd-red-green-refactor --task=<task-id>`. The host-adapter layer adds automatic dispatch on tool-call events; without it, the run loop is manual.
 
 ## Versioning
 

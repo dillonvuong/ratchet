@@ -1,6 +1,6 @@
 # Why TDD is the canonical first gate
 
-The choice of red/green/refactor TDD as ratchet's first gate is not aesthetic. It is forced by the constraints of the problem and the available evidence.
+The choice of red/green/refactor TDD as maxwell's first gate is not aesthetic. It is forced by the constraints of the problem and the available evidence.
 
 ## The argument in one paragraph
 
@@ -20,9 +20,9 @@ A model that has learned to hide misbehavior cannot be relied upon to grade its 
 
 InstructGPT reports 72.6% inter-labeler agreement on subjective tasks. That is the noise floor for human judgment. Any gate whose verdict is reproducible at less than 73% across re-runs is broken. Test runners are typically deterministic at six nines or better given fixed inputs and seed; they are the rare gate primitive that lives well above the noise floor.
 
-DeepSeek-R1 §2.2.2 is the contemporary verdict: "the neural reward model may suffer from reward hacking in the large-scale reinforcement learning process… retraining the reward model needs additional training resources and it complicates the whole training pipeline." DeepSeek explicitly chose deterministic rule-based rewards. ratchet's first gate inherits that choice.
+DeepSeek-R1 §2.2.2 is the contemporary verdict: "the neural reward model may suffer from reward hacking in the large-scale reinforcement learning process… retraining the reward model needs additional training resources and it complicates the whole training pipeline." DeepSeek explicitly chose deterministic rule-based rewards. maxwell's first gate inherits that choice.
 
-### 4. Git topology is publicly verifiable (Cherny intuition; ratchet implementation)
+### 4. Git topology is publicly verifiable (Cherny intuition; maxwell implementation)
 
 Cherny's framing of git as the system of record carries directly. The TDD gate's verdict is not "the agent says the test went red then green"; it is "git history shows the test added in commit N failing, the test in commit N+1 passing, and no test was deleted." Anyone can re-run the assertion from the public log. The harness does not have to be trusted — only `git`.
 
@@ -82,7 +82,7 @@ For each test file in test-glob paths:
 
 The TDD gate does not enforce coding style, architecture choice, or the "right" test framework. It does not measure code coverage, complexity, or aesthetic. Each of those is a separate gate (or future gate) and each has its own justification.
 
-The TDD gate also does not generate tests. The agent is responsible for producing tests; ratchet only verifies that the tests have the right topology in git. This is by design: per Sutton, "the contents of minds are tremendously, irredeemably complex" and we should not encode our taxonomy of "good tests" into the runner. We only encode the meta-rule: tests precede code, tests survive, F2P transitions exist.
+The TDD gate also does not generate tests. The agent is responsible for producing tests; maxwell only verifies that the tests have the right topology in git. This is by design: per Sutton, "the contents of minds are tremendously, irredeemably complex" and we should not encode our taxonomy of "good tests" into the runner. We only encode the meta-rule: tests precede code, tests survive, F2P transitions exist.
 
 ## Why this is the *first* gate, not the only gate
 
@@ -94,7 +94,7 @@ Subsequent gates layered on top:
 - **`coverage-floor`** — coverage report comparison vs baseline. Deterministic; asymmetric (coverage MUST NOT decrease).
 - **`evaluator-agent` (advisory)** — LLM-judge that reviews the diff. `judge_kind: llm_advisory`. Per Toolformer, its suggestions are kept only if they would change another deterministic gate's verdict. Never a primary verdict per §13.1.
 
-Each of these is justified separately and gated by `ratchet_spec_version`. None is required for TDD to ship.
+Each of these is justified separately and gated by `maxwell_spec_version`. None is required for TDD to ship.
 
 ## What we deliberately defer
 

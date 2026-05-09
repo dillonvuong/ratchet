@@ -1,6 +1,6 @@
 package runner
 
-// Minimal YAML frontmatter parser for ratchet.md and SKILL.md.
+// Minimal YAML frontmatter parser for maxwell.md and SKILL.md.
 //
 // We deliberately avoid pulling in gopkg.in/yaml.v3 to keep the binary
 // dependency-free for v0.1. The frontmatter shapes we accept are bounded
@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-// parseFrontmatter parses the top-level ratchet.md frontmatter into Config.
+// parseFrontmatter parses the top-level maxwell.md frontmatter into Config.
 func parseFrontmatter(s string) (*Config, error) {
 	root, err := parseYAMLBlock(s, 0)
 	if err != nil {
@@ -24,8 +24,8 @@ func parseFrontmatter(s string) (*Config, error) {
 	}
 	cfg := &Config{}
 
-	if v, ok := root["ratchet_spec_version"].(string); ok {
-		cfg.RatchetSpecVersion = v
+	if v, ok := root["maxwell_spec_version"].(string); ok {
+		cfg.MaxwellSpecVersion = v
 	}
 	if v, ok := root["verdict_model"].(string); ok {
 		cfg.VerdictModel = v
@@ -143,8 +143,8 @@ func parseGateFrontmatter(s string) (Gate, error) {
 	if v, ok := root["severity"].(string); ok {
 		g.Severity = Severity(v)
 	}
-	if v, ok := root["ratchet_spec_version"].(string); ok {
-		g.RatchetSpecVersion = v
+	if v, ok := root["maxwell_spec_version"].(string); ok {
+		g.MaxwellSpecVersion = v
 	}
 	g.Assumptions = stringList(root["assumptions"])
 	if g.Name == "" {
@@ -153,8 +153,8 @@ func parseGateFrontmatter(s string) (Gate, error) {
 	if g.Description == "" {
 		return Gate{}, errors.New("SKILL.md frontmatter: description is required")
 	}
-	if g.RatchetSpecVersion == "" {
-		return Gate{}, errors.New("SKILL.md frontmatter: ratchet_spec_version is required")
+	if g.MaxwellSpecVersion == "" {
+		return Gate{}, errors.New("SKILL.md frontmatter: maxwell_spec_version is required")
 	}
 	return g, nil
 }

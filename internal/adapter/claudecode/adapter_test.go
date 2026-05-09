@@ -51,19 +51,19 @@ func TestExtractVersion(t *testing.T) {
 }
 
 func TestVerifyCLIVersion_FromEnv(t *testing.T) {
-	t.Setenv("RATCHET_CLAUDE_CLI_VERSION", "2.1.0")
+	t.Setenv("MAXWELL_CLAUDE_CLI_VERSION", "2.1.0")
 	if err := VerifyCLIVersion(); err != nil {
 		t.Errorf("expected ok, got %v", err)
 	}
-	t.Setenv("RATCHET_CLAUDE_CLI_VERSION", "1.5.0")
+	t.Setenv("MAXWELL_CLAUDE_CLI_VERSION", "1.5.0")
 	if err := VerifyCLIVersion(); err == nil {
 		t.Errorf("expected refusal on old version")
 	}
 }
 
 func TestVerifyCLIVersion_SkipsWhenAsked(t *testing.T) {
-	t.Setenv("RATCHET_SKIP_HOST_CHECK", "1")
-	t.Setenv("RATCHET_CLAUDE_CLI_VERSION", "0.0.1") // would otherwise refuse
+	t.Setenv("MAXWELL_SKIP_HOST_CHECK", "1")
+	t.Setenv("MAXWELL_CLAUDE_CLI_VERSION", "0.0.1") // would otherwise refuse
 	if err := VerifyCLIVersion(); err != nil {
 		t.Errorf("expected skip, got %v", err)
 	}
@@ -115,7 +115,7 @@ func TestWriteSettings(t *testing.T) {
 	dir := t.TempDir()
 	hooks := map[string][]HookSourceConfig{
 		"PreToolUse": {
-			{Matcher: "Write|Edit", Command: "ratchet gate", TimeoutSec: 30},
+			{Matcher: "Write|Edit", Command: "maxwell gate", TimeoutSec: 30},
 		},
 		"pre_tool_use": { // alternate spelling should canonicalize
 			{Matcher: "*", Command: "echo same-event"},

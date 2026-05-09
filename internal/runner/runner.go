@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dillon-vuong/ratchet/internal/gitsubstrate"
-	"github.com/dillon-vuong/ratchet/internal/reflections"
-	"github.com/dillon-vuong/ratchet/internal/transcripts"
+	"github.com/dillonvuong/maxwell/internal/gitsubstrate"
+	"github.com/dillonvuong/maxwell/internal/reflections"
+	"github.com/dillonvuong/maxwell/internal/transcripts"
 )
 
 // Runner orchestrates gate dispatch for one task attempt.
@@ -62,7 +62,7 @@ gateLoop:
 		gateRuns = append(gateRuns, gr)
 		if gr.Verdict.Value == VerdictNO && gate.Severity == SeverityP0 {
 			p0Failed = true
-			fmt.Fprintf(os.Stderr, "ratchet: aborting subsequent gates (P0 NO from %q)\n", gate.Name)
+			fmt.Fprintf(os.Stderr, "maxwell: aborting subsequent gates (P0 NO from %q)\n", gate.Name)
 			break gateLoop
 		}
 	}
@@ -77,7 +77,7 @@ gateLoop:
 		// Spec §13.8: a FULL verdict MUST be reproducible from the published
 		// transcript. If we cannot persist the transcript, demote the verdict
 		// rather than silently emit a green that no third party can audit.
-		fmt.Fprintf(os.Stderr, "ratchet: transcript finalize failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: transcript finalize failed: %v\n", err)
 		if final.Value == VerdictFULL || final.Value == VerdictPARTIAL {
 			final.Value = VerdictERROR
 			final.Reason = fmt.Sprintf("transcript finalize failed: %v", err)
@@ -127,7 +127,7 @@ func (r *Runner) RunGate(gate Gate) GateRun {
 			CreatedAt:           time.Now().UTC(),
 		})
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ratchet: write reflection: %v\n", err)
+			fmt.Fprintf(os.Stderr, "maxwell: write reflection: %v\n", err)
 		} else {
 			gr.ReflectionPath = path
 		}
@@ -166,10 +166,10 @@ func (r *Runner) runScript(script string, gate Gate) Evidence {
 	// review). Defense in depth: workspace also has Read(./skills/**) +
 	// Write(./skills/**) deny rules in the Claude Code permission grammar.
 	cmd.Env = append(scrubInjectionEnv(os.Environ()),
-		"RATCHET_TASK_ID="+r.taskID,
-		"RATCHET_BASE_REF="+r.baseRef(),
-		"RATCHET_PROD_CODE_GLOBS="+strings.Join(r.cfg.Workspace.ProdCodeGlobs, ":"),
-		"RATCHET_TEST_GLOBS="+strings.Join(r.cfg.Workspace.TestGlobs, ":"),
+		"MAXWELL_TASK_ID="+r.taskID,
+		"MAXWELL_BASE_REF="+r.baseRef(),
+		"MAXWELL_PROD_CODE_GLOBS="+strings.Join(r.cfg.Workspace.ProdCodeGlobs, ":"),
+		"MAXWELL_TEST_GLOBS="+strings.Join(r.cfg.Workspace.TestGlobs, ":"),
 	)
 
 	var stdout, stderr bytes.Buffer
@@ -349,7 +349,7 @@ func (r *Runner) baseRef() string {
 }
 
 func nextAttemptNumber(repoRoot, taskID, gateName string) int {
-	dir := filepath.Join(repoRoot, ".ratchet", "reflections", taskID, gateName)
+	dir := filepath.Join(repoRoot, ".maxwell", "reflections", taskID, gateName)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return 1

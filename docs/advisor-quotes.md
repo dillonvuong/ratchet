@@ -172,7 +172,7 @@ Source attribution is per-quote. When a passage is recovered from a cache or tra
 >
 > — *Let's Verify Step by Step* (2023)
 
-This is the canonical citation for ratchet's per-commit (process) gating over per-PR (outcome) gating.
+This is the canonical citation for maxwell's per-commit (process) gating over per-PR (outcome) gating.
 
 ---
 
@@ -182,7 +182,7 @@ This is the canonical citation for ratchet's per-commit (process) gating over pe
 >
 > — *Reflexion* (2023)
 
-This is the spec for `.ratchet/reflections/` (§10 of the spec).
+This is the spec for `.maxwell/reflections/` (§10 of the spec).
 
 ---
 
@@ -192,7 +192,7 @@ This is the spec for `.ratchet/reflections/` (§10 of the spec).
 >
 > — *DeepSeek-R1* (2025), §2.2.2
 
-The canonical justification for deterministic rule-based rewards over learned reward models in ratchet's verdict layer.
+The canonical justification for deterministic rule-based rewards over learned reward models in maxwell's verdict layer.
 
 ---
 
@@ -234,7 +234,7 @@ The canonical justification for deterministic rule-based rewards over learned re
 >
 > — paraphrased, openclaw philosophy
 
-(Steinberger's framing of every transition — plan → code → commit → PR — as a checkpoint with a verdict, never a soft pass, is the conceptual ancestor of ratchet's strict reducer in §8.2.)
+(Steinberger's framing of every transition — plan → code → commit → PR — as a checkpoint with a verdict, never a soft pass, is the conceptual ancestor of maxwell's strict reducer in §8.2.)
 
 ---
 
@@ -258,6 +258,6 @@ The canonical justification for deterministic rule-based rewards over learned re
 
 The advisors disagree on real things. Disagreement is signal, not noise.
 
-- **Cherny vs Lopopolo on MCP.** Cherny: "Big fans, server + client, re-expose local commands as MCP prompts." Lopopolo: "Pretty bearish on MCPs because the harness forcibly injects all those tokens in the context… they mess with auto compaction." ratchet's resolution: gates are subprocess-shaped by default; MCP is opt-in for stateful gates only.
-- **Cherny vs Karpathy on knowledge.** Cherny: "Everything is the model." Karpathy: "Strip the model down to a cognitive core; the *external* scratchpad and culture loop are the missing pieces." ratchet's resolution: durable lessons live in `MEMORY.md`-style externalized files (Karpathy); the model subsumes per-session context (Cherny).
-- **The Z/L Continuum.** Lopopolo "Code is free, code is a liability"; Mario Zechner "Slow the fuck down. Everything's broken. Read every fucking line of critical code." (AIE Europe, 2026 — both got standing ovations.) ratchet sits closer to Zechner for verdicts (hard, deterministic, reproducible) and closer to Lopopolo for throughput (parallel attempts, disposable workspaces, fast iteration).
+- **Cherny vs Lopopolo on MCP.** Cherny: "Big fans, server + client, re-expose local commands as MCP prompts." Lopopolo: "Pretty bearish on MCPs because the harness forcibly injects all those tokens in the context… they mess with auto compaction." maxwell's resolution: gates are subprocess-shaped by default; MCP is opt-in for stateful gates only.
+- **Cherny vs Karpathy on knowledge.** Cherny: "Everything is the model." Karpathy: "Strip the model down to a cognitive core; the *external* scratchpad and culture loop are the missing pieces." maxwell's resolution: durable lessons live in `MEMORY.md`-style externalized files (Karpathy); the model subsumes per-session context (Cherny).
+- **The Z/L Continuum.** Lopopolo "Code is free, code is a liability"; Mario Zechner "Slow the fuck down. Everything's broken. Read every fucking line of critical code." (AIE Europe, 2026 — both got standing ovations.) maxwell sits closer to Zechner for verdicts (hard, deterministic, reproducible) and closer to Lopopolo for throughput (parallel attempts, disposable workspaces, fast iteration).

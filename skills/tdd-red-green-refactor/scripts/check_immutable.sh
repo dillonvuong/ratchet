@@ -11,8 +11,8 @@
 set -euo pipefail
 
 WORKSPACE="${1:-.}"
-BASE_REF="${RATCHET_BASE_REF:-HEAD~1}"
-TEST_GLOBS="${RATCHET_TEST_GLOBS:-**/*_test.go:**/*_test.py:**/*.test.ts:**/*.test.js:tests/**:test/**:spec/**}"
+BASE_REF="${MAXWELL_BASE_REF:-HEAD~1}"
+TEST_GLOBS="${MAXWELL_TEST_GLOBS:-**/*_test.go:**/*_test.py:**/*.test.ts:**/*.test.js:tests/**:test/**:spec/**}"
 
 cd "$WORKSPACE"
 

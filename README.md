@@ -1,4 +1,4 @@
-# ratchet
+# maxwell
 
 A host-agnostic harness for code-generation agents. Enforces composable, hard-verdict gates over agent output. The first-class gate is red/green/refactor TDD enforcement on a git-topology substrate.
 
@@ -18,7 +18,7 @@ The spec is the durable artifact. The Go binary in this repo is one reference im
                                │ gate dispatch
                                ▼
    ┌─────────────────────────────────────────────────────────────┐
-   │                     ratchet runner                          │
+   │                     maxwell runner                          │
    │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────┐│
    │  │  TDD gate    │  │  lint gate   │  │  evaluator (P2)    ││
    │  │  (P0)        │  │  (P1)        │  │  llm_advisory      ││
@@ -26,44 +26,44 @@ The spec is the durable artifact. The Go binary in this repo is one reference im
    │         │                  │                    │           │
    │         ▼                  ▼                    ▼           │
    │            verdict aggregation (FULL/PARTIAL/NO/ERROR)      │
-   │            reflection emission (.ratchet/reflections/)      │
-   │            transcript emission (.ratchet/transcripts/)      │
+   │            reflection emission (.maxwell/reflections/)      │
+   │            transcript emission (.maxwell/transcripts/)      │
    └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Why
 
-Self-evaluation is biased; soft review scales poorly; LLM-judged verdicts can be fooled by adversarial training (Sleeper Agents, 2024). ratchet enforces deterministic external verdicts at every step. The TDD gate is the cheapest reliable verifier: a test runner produces a binary verdict in milliseconds, and git topology makes the verdict publicly auditable.
+Self-evaluation is biased; soft review scales poorly; LLM-judged verdicts can be fooled by adversarial training (Sleeper Agents, 2024). maxwell enforces deterministic external verdicts at every step. The TDD gate is the cheapest reliable verifier: a test runner produces a binary verdict in milliseconds, and git topology makes the verdict publicly auditable.
 
 ## Quick start
 
 ```bash
 # Build
-go build -o ratchet ./cmd/ratchet
+go build -o maxwell ./cmd/maxwell
 
 # Initialize a repo
-./ratchet init
+./maxwell init
 
 # Run gates against the working tree
-./ratchet run
+./maxwell run
 
 # Run a specific gate
-./ratchet gate --name=tdd-red-green-refactor
+./maxwell gate --name=tdd-red-green-refactor
 
 # Show version + spec compatibility
-./ratchet version
+./maxwell version
 ```
 
-The `init` command writes `ratchet.md`, `AGENTS.md`, and `skills/tdd-red-green-refactor/` into the current directory.
+The `init` command writes `maxwell.md`, `AGENTS.md`, and `skills/tdd-red-green-refactor/` into the current directory.
 
 ## What ships in v0.1
 
 - **Spec** (`docs/spec.md`) — Symphony-class normative document, RFC 2119, conformance matrix.
 - **TDD gate** (`skills/tdd-red-green-refactor/`) — red/green/refactor with F2P/P2P semantics adopted from SWE-Bench.
 - **Claude Code adapter** (`internal/adapter/claudecode`) — PreToolUse/PostToolUse hooks, `.claude/settings.json` generation, `claude --output-format stream-json` consumption.
-- **Reflexion-shaped failure artifacts** (`.ratchet/reflections/`) — written on every non-FULL verdict, prepended to next attempt's prompt.
-- **METR/AISI-aligned transcripts** (`.ratchet/transcripts/`) — every required field for longitudinal analysis.
-- **Self-hosting CI** — ratchet runs ratchet on its own commits.
+- **Reflexion-shaped failure artifacts** (`.maxwell/reflections/`) — written on every non-FULL verdict, prepended to next attempt's prompt.
+- **METR/AISI-aligned transcripts** (`.maxwell/transcripts/`) — every required field for longitudinal analysis.
+- **Self-hosting CI** — maxwell runs maxwell on its own commits.
 
 ## What's reserved for later versions
 
@@ -74,7 +74,7 @@ The `init` command writes `ratchet.md`, `AGENTS.md`, and `skills/tdd-red-green-r
 
 ## Built for three consumers
 
-Per Karpathy: humans, computers, and **agents**. ratchet's docs are agent-tuned: `AGENTS.md` is the table-of-contents; `ratchet.md` is the doctrine prompt; every gate emits structured stderr; verdicts are exit codes; failure artifacts are Reflexion-shaped.
+Per Karpathy: humans, computers, and **agents**. maxwell's docs are agent-tuned: `AGENTS.md` is the table-of-contents; `maxwell.md` is the doctrine prompt; every gate emits structured stderr; verdicts are exit codes; failure artifacts are Reflexion-shaped.
 
 ## Status
 
@@ -82,7 +82,7 @@ Per Karpathy: humans, computers, and **agents**. ratchet's docs are agent-tuned:
 
 ## Advisors
 
-ratchet draws on the published methodology of Boris Cherny (Anthropic / Claude Code), Ryan Lopopolo (OpenAI / Harness Engineering), Andrej Karpathy (Software 3.0), Simon Willison (TDD with AI), Peter Steinberger (gates philosophy from openclaw), Anthropic's engineering team (Managed Agents, harness design, evals), and the agent-research literature (ReAct, Reflexion, CodeAct, Let's Verify Step by Step, Sleeper Agents, DeepSeek-R1). See `docs/advisor-quotes.md` for the verbatim canon and `docs/references.md` for the full bibliography.
+maxwell draws on the published methodology of Boris Cherny (Anthropic / Claude Code), Ryan Lopopolo (OpenAI / Harness Engineering), Andrej Karpathy (Software 3.0), Simon Willison (TDD with AI), Peter Steinberger (gates philosophy from openclaw), Anthropic's engineering team (Managed Agents, harness design, evals), and the agent-research literature (ReAct, Reflexion, CodeAct, Let's Verify Step by Step, Sleeper Agents, DeepSeek-R1). See `docs/advisor-quotes.md` for the verbatim canon and `docs/references.md` for the full bibliography.
 
 ## Contributing
 

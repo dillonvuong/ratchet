@@ -1,4 +1,4 @@
-// ratchet — host-agnostic harness enforcing hard-verdict gates over agent output.
+// maxwell — host-agnostic harness enforcing hard-verdict gates over agent output.
 //
 // See docs/spec.md for the normative specification. This binary is one
 // reference implementation; conformance to the spec is the durable contract.
@@ -11,10 +11,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dillon-vuong/ratchet/internal/adapter/claudecode"
-	"github.com/dillon-vuong/ratchet/internal/gitsubstrate"
-	"github.com/dillon-vuong/ratchet/internal/reflections"
-	"github.com/dillon-vuong/ratchet/internal/runner"
+	"github.com/dillonvuong/maxwell/internal/adapter/claudecode"
+	"github.com/dillonvuong/maxwell/internal/gitsubstrate"
+	"github.com/dillonvuong/maxwell/internal/reflections"
+	"github.com/dillonvuong/maxwell/internal/runner"
 )
 
 const (
@@ -47,36 +47,36 @@ func main() {
 	case "help", "--help", "-h":
 		printUsage(os.Stdout)
 	default:
-		fmt.Fprintf(os.Stderr, "ratchet: unknown command %q\n\n", cmd)
+		fmt.Fprintf(os.Stderr, "maxwell: unknown command %q\n\n", cmd)
 		printUsage(os.Stderr)
 		os.Exit(2)
 	}
 }
 
 func printUsage(w io.Writer) {
-	fmt.Fprintf(w, `ratchet %s — spec %s
+	fmt.Fprintf(w, `maxwell %s — spec %s
 
 Usage:
-  ratchet run [--config <path>] [--task <id>]
-      Run all gates declared in ratchet.md against the working tree.
+  maxwell run [--config <path>] [--task <id>]
+      Run all gates declared in maxwell.md against the working tree.
 
-  ratchet gate --name <gate-name> [--on <event>] [--task <id>]
+  maxwell gate --name <gate-name> [--on <event>] [--task <id>]
       Run a single named gate. Used by host adapters from hook events.
       Events: PreToolUse | PostToolUse | Stop | PreCompact | PostCompact
 
-  ratchet recall [--task <id>] [--gate <name>]
+  maxwell recall [--task <id>] [--gate <name>]
       Print the latest reflection(s) for the current task. Closes the
       anterograde-amnesia loop (spec §10): the agent runs this at session
       start so prior failure observations re-enter context.
 
-  ratchet init [<dir>]
-      Scaffold ratchet.md, AGENTS.md, and skills/tdd-red-green-refactor/
+  maxwell init [<dir>]
+      Scaffold maxwell.md, AGENTS.md, and skills/tdd-red-green-refactor/
       into the current or specified directory.
 
-  ratchet version
+  maxwell version
       Print the binary version and the spec version it implements.
 
-  ratchet finalize-transcript
+  maxwell finalize-transcript
       Close out the current run's transcript artifact.
 
 Documentation:
@@ -85,21 +85,21 @@ Documentation:
   docs/adding-a-gate.md    How to write a new gate
   docs/maintenance.md      Versioning, deprecation, RFC process
   AGENTS.md                Table of contents
-  ratchet.md               Doctrine prompt body
+  maxwell.md               Doctrine prompt body
 
 `, binaryVersion, specVersion)
 }
 
 func cmdVersion(w io.Writer) {
-	fmt.Fprintf(w, "ratchet %s\n", binaryVersion)
+	fmt.Fprintf(w, "maxwell %s\n", binaryVersion)
 	fmt.Fprintf(w, "spec %s\n", specVersion)
-	fmt.Fprintf(w, "ref-impl: github.com/dillon-vuong/ratchet\n")
+	fmt.Fprintf(w, "ref-impl: github.com/dillonvuong/maxwell\n")
 	fmt.Fprintf(w, "license: Apache-2.0\n")
 }
 
 func cmdRun(args []string) int {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
-	configPath := fs.String("config", "ratchet.md", "path to ratchet.md")
+	configPath := fs.String("config", "maxwell.md", "path to maxwell.md")
 	taskID := fs.String("task", "", "task identifier (optional; auto-derived from branch if empty)")
 	skipGitRepoCheck := fs.Bool("skip-git-repo-check", false, "skip the git repo precondition")
 	jsonOut := fs.Bool("json", false, "emit JSONL run events on stdout")
@@ -107,23 +107,23 @@ func cmdRun(args []string) int {
 
 	cfg, err := runner.LoadConfig(*configPath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 	if err := cfg.Validate(specVersion); err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
 	if !*skipGitRepoCheck {
 		if !gitsubstrate.IsRepo(".") {
-			fmt.Fprintln(os.Stderr, "ratchet: not a git repository (use --skip-git-repo-check to override)")
+			fmt.Fprintln(os.Stderr, "maxwell: not a git repository (use --skip-git-repo-check to override)")
 			return 1
 		}
 	}
 
 	if err := claudecode.VerifyCLIVersion(); err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
@@ -133,7 +133,7 @@ func cmdRun(args []string) int {
 
 	r, err := runner.New(cfg, *taskID, runner.Options{JSONOut: *jsonOut})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
@@ -160,29 +160,29 @@ func cmdGate(args []string) int {
 	_ = fs.Parse(args)
 
 	if *gateName == "" {
-		fmt.Fprintln(os.Stderr, "ratchet gate: --name is required")
+		fmt.Fprintln(os.Stderr, "maxwell gate: --name is required")
 		return 2
 	}
 
-	cfg, err := runner.LoadConfig("ratchet.md")
+	cfg, err := runner.LoadConfig("maxwell.md")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
 	if err := cfg.Validate(specVersion); err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
 	gate, err := cfg.FindGate(*gateName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
 	if err := claudecode.VerifyCLIVersion(); err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
@@ -192,7 +192,7 @@ func cmdGate(args []string) int {
 
 	r, err := runner.New(cfg, *taskID, runner.Options{TriggerEvent: *onEvent})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
@@ -227,11 +227,11 @@ func cmdRecall(args []string) int {
 
 	repoRoot, err := filepath.Abs(".")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
-	taskDir := filepath.Join(repoRoot, ".ratchet", "reflections", *taskID)
+	taskDir := filepath.Join(repoRoot, ".maxwell", "reflections", *taskID)
 	entries, err := os.ReadDir(taskDir)
 	if err != nil {
 		// No reflections yet — nothing to recall is a clean state, not an error.
@@ -269,28 +269,28 @@ func cmdInit(args []string) int {
 	}
 	abs, err := filepath.Abs(target)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 	if err := os.MkdirAll(abs, 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "ratchet: %v\n", err)
+		fmt.Fprintf(os.Stderr, "maxwell: %v\n", err)
 		return 1
 	}
 
 	// In v0.1, init copies the canonical files from the binary's embedded fs.
 	// For now, print guidance.
-	fmt.Fprintf(os.Stdout, `ratchet init: scaffold the v0.1 layout into %s
+	fmt.Fprintf(os.Stdout, `maxwell init: scaffold the v0.1 layout into %s
 
 Required files (copy from this repository):
-  ratchet.md                                    — frontmatter + doctrine
+  maxwell.md                                    — frontmatter + doctrine
   AGENTS.md                                     — table-of-contents
   skills/tdd-red-green-refactor/SKILL.md       — first gate
   skills/tdd-red-green-refactor/scripts/*.sh   — gate scripts (chmod +x)
 
 After scaffolding, run:
-  ratchet run
+  maxwell run
 
-Embedded init will land in v0.1.1; for now, see github.com/dillon-vuong/ratchet
+Embedded init will land in v0.1.1; for now, see github.com/dillonvuong/maxwell
 for the canonical layout.
 `, abs)
 	return 0
@@ -300,11 +300,10 @@ func cmdFinalizeTranscript(args []string) int {
 	_ = args
 	// In v0.1, transcripts are finalized by the runner on Run() completion.
 	// This entry point exists for hook integration (Stop event).
-	if os.Getenv("RATCHET_RUN_ID") == "" {
-		fmt.Fprintln(os.Stderr, "ratchet finalize-transcript: no active run")
+	if os.Getenv("MAXWELL_RUN_ID") == "" {
+		fmt.Fprintln(os.Stderr, "maxwell finalize-transcript: no active run")
 		return 0
 	}
-	fmt.Fprintln(os.Stderr, "ratchet finalize-transcript: ok")
+	fmt.Fprintln(os.Stderr, "maxwell finalize-transcript: ok")
 	return 0
 }
-

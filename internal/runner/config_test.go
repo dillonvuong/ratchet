@@ -100,7 +100,7 @@ func TestLoadConfig_RoundTrip(t *testing.T) {
 name: tdd-red-green-refactor
 description: First gate.
 severity: P0
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 assumptions:
   - "Model can produce code without tests."
 ---
@@ -110,8 +110,8 @@ assumptions:
 		t.Fatal(err)
 	}
 
-	ratchetMD := `---
-ratchet_spec_version: "0.1"
+	maxwellMD := `---
+maxwell_spec_version: "0.1"
 verdict_model: hard
 self_judgment: forbidden
 
@@ -134,10 +134,10 @@ workspace:
 
 # doctrine
 
-You are operating under ratchet.
+You are operating under maxwell.
 `
-	cfgPath := filepath.Join(dir, "ratchet.md")
-	if err := os.WriteFile(cfgPath, []byte(ratchetMD), 0o644); err != nil {
+	cfgPath := filepath.Join(dir, "maxwell.md")
+	if err := os.WriteFile(cfgPath, []byte(maxwellMD), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -145,8 +145,8 @@ You are operating under ratchet.
 	if err != nil {
 		t.Fatalf("LoadConfig: %v", err)
 	}
-	if cfg.RatchetSpecVersion != "0.1" {
-		t.Errorf("RatchetSpecVersion = %q", cfg.RatchetSpecVersion)
+	if cfg.MaxwellSpecVersion != "0.1" {
+		t.Errorf("MaxwellSpecVersion = %q", cfg.MaxwellSpecVersion)
 	}
 	if cfg.VerdictModel != "hard" {
 		t.Errorf("VerdictModel = %q", cfg.VerdictModel)
@@ -183,8 +183,8 @@ You are operating under ratchet.
 
 func TestLoadConfig_RejectsEmptyBody(t *testing.T) {
 	dir := t.TempDir()
-	cfgPath := filepath.Join(dir, "ratchet.md")
-	body := "---\nratchet_spec_version: \"0.1\"\ngates:\n  - name: foo\n---\n\n"
+	cfgPath := filepath.Join(dir, "maxwell.md")
+	body := "---\nmaxwell_spec_version: \"0.1\"\ngates:\n  - name: foo\n---\n\n"
 	if err := os.WriteFile(cfgPath, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -196,11 +196,11 @@ func TestLoadConfig_RejectsEmptyBody(t *testing.T) {
 
 func TestValidate_RejectsSelfJudgmentPermitted(t *testing.T) {
 	cfg := &Config{
-		RatchetSpecVersion: "0.1",
+		MaxwellSpecVersion: "0.1",
 		SelfJudgment:       "permitted",
 		Gates:              []GateRef{{Name: "x"}},
 		LoadedGates: []Gate{
-			{Name: "x", RatchetSpecVersion: "0.1", Scripts: []string{"a"}},
+			{Name: "x", MaxwellSpecVersion: "0.1", Scripts: []string{"a"}},
 		},
 		PromptBody: "x",
 	}

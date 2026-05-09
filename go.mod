@@ -1,3 +1,3 @@
-module github.com/dillon-vuong/ratchet
+module github.com/dillonvuong/maxwell
 
 go 1.22

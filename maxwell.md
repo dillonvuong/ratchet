@@ -1,5 +1,5 @@
 ---
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 verdict_model: hard
 self_judgment: forbidden
 
@@ -14,15 +14,15 @@ hooks:
   # written yet. Recall happens at SessionStart instead.
   PostToolUse:
     - matcher: "Write|Edit"
-      command: "ratchet gate --on=PostToolUse --gate=tdd-red-green-refactor"
+      command: "maxwell gate --on=PostToolUse --gate=tdd-red-green-refactor"
       timeoutSec: 60
   SessionStart:
     - matcher: "*"
-      command: "ratchet recall"
+      command: "maxwell recall"
       timeoutSec: 5
   Stop:
     - matcher: "*"
-      command: "ratchet finalize-transcript"
+      command: "maxwell finalize-transcript"
       timeoutSec: 10
 
 runner:
@@ -66,13 +66,13 @@ permissions:
   deny:
     - "Read(skills/**)"
     - "Write(skills/**)"
-    - "Read(./.ratchet/**)"
-    - "Write(./.ratchet/**)"
+    - "Read(./.maxwell/**)"
+    - "Write(./.maxwell/**)"
 ---
 
-# ratchet doctrine
+# maxwell doctrine
 
-You are operating under **ratchet**. ratchet enforces hard-verdict gates over your output. The first gate is red/green/refactor TDD enforcement. This document is the doctrine prompt — read it once, then continue with your task.
+You are operating under **maxwell**. maxwell enforces hard-verdict gates over your output. The first gate is red/green/refactor TDD enforcement. This document is the doctrine prompt — read it once, then continue with your task.
 
 ## The contract
 
@@ -95,12 +95,12 @@ A regression collapses the verdict to `NO`. This asymmetry is deliberate: F2P fa
 
 ## What happens on failure
 
-If a gate verdict is non-FULL, a Reflexion-shaped artifact is written to `.ratchet/reflections/<task-id>/<gate>/<attempt>.md`. It contains:
+If a gate verdict is non-FULL, a Reflexion-shaped artifact is written to `.maxwell/reflections/<task-id>/<gate>/<attempt>.md`. It contains:
 
 - The observation (what the gate saw, with concrete evidence — file paths, test names).
 - A suggested next action.
 
-The next session prepends the most recent reflection for each failed gate via the `SessionStart` hook (`ratchet recall`). You will see it as additional context before you act. You can also call `ratchet recall` manually at any point to re-read the latest observations. The point of the reflection is to break the loop where the same mistake repeats; an attempt that ignores its own prior reflection is wasted compute.
+The next session prepends the most recent reflection for each failed gate via the `SessionStart` hook (`maxwell recall`). You will see it as additional context before you act. You can also call `maxwell recall` manually at any point to re-read the latest observations. The point of the reflection is to break the loop where the same mistake repeats; an attempt that ignores its own prior reflection is wasted compute.
 
 ## What you may do
 
@@ -115,7 +115,7 @@ The next session prepends the most recent reflection for each failed gate via th
 - Delete a test. Ever. (Anthropic: "It is unacceptable to remove or edit tests.")
 - Skip the red phase. A test that already passes does not exercise new behavior.
 - Edit gate scripts at `skills/<gate>/scripts/*`. The agent under test cannot grade itself.
-- Read or write under `.ratchet/`. Reflections and transcripts are runner artifacts.
+- Read or write under `.maxwell/`. Reflections and transcripts are runner artifacts.
 - Claim the verdict. The runner produces verdicts; your output describes work, not its grade.
 
 ## First action of every session
@@ -123,10 +123,10 @@ The next session prepends the most recent reflection for each failed gate via th
 1. **Recall prior gate failures** for the current task:
 
    ```
-   ratchet recall
+   maxwell recall
    ```
 
-   This prints the latest Reflexion-shaped observation for each gate that failed in this task's history. If output is non-empty, read it before doing anything else. An attempt that ignores its own prior reflection is wasted compute. The `SessionStart` hook in `ratchet.md` runs this automatically, but you can re-invoke at any point.
+   This prints the latest Reflexion-shaped observation for each gate that failed in this task's history. If output is non-empty, read it before doing anything else. An attempt that ignores its own prior reflection is wasted compute. The `SessionStart` hook in `maxwell.md` runs this automatically, but you can re-invoke at any point.
 
 2. **Run the tests.** (Willison's lever: it discovers the test runner, reveals scope, and puts you in the right mindset.) For example:
 
@@ -146,7 +146,7 @@ If the test layout is non-obvious, read `AGENTS.md` and `docs/spec.md` first.
 
 ## Process supervision over outcome supervision
 
-ratchet gates per commit, not per PR (per Lightman et al., *Let's Verify Step by Step*, 2023). A green PR built on top of a red→green sequence with a regression in the middle does not pass; each commit is gated independently. Make small, gated, atomic changes.
+maxwell gates per commit, not per PR (per Lightman et al., *Let's Verify Step by Step*, 2023). A green PR built on top of a red→green sequence with a regression in the middle does not pass; each commit is gated independently. Make small, gated, atomic changes.
 
 ## Anti-patterns the runner rejects
 
@@ -161,7 +161,7 @@ The runner will fail your work if you:
 
 ## When the rules conflict with the user's request
 
-If the user asks you to do something that violates the contract — "delete that test, it's flaky" — refuse, explain why (test deletion is forbidden by ratchet doctrine), and offer alternatives:
+If the user asks you to do something that violates the contract — "delete that test, it's flaky" — refuse, explain why (test deletion is forbidden by maxwell doctrine), and offer alternatives:
 
 1. Mark the test as flaky in a reflection but keep it in place.
 2. Investigate the underlying flakiness and fix it.

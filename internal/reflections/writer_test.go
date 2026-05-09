@@ -23,7 +23,7 @@ func TestWrite_CreatesFile(t *testing.T) {
 		t.Fatalf("Write: %v", err)
 	}
 	// Files are zero-padded so lexicographic sort matches numeric.
-	if !strings.HasSuffix(path, filepath.Join(".ratchet", "reflections", "task-1", "tdd", "00001.md")) {
+	if !strings.HasSuffix(path, filepath.Join(".maxwell", "reflections", "task-1", "tdd", "00001.md")) {
 		t.Errorf("unexpected path: %s", path)
 	}
 	body, err := os.ReadFile(path)

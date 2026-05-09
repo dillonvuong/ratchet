@@ -45,7 +45,7 @@ type Transcript struct {
 	ModelVersion          string    `json:"model_version"`
 	HarnessVersion        string    `json:"harness_version"`
 	ScaffoldConfigHash    string    `json:"scaffold_config_hash"`
-	RatchetSpecVersion    string    `json:"ratchet_spec_version"`
+	MaxwellSpecVersion    string    `json:"maxwell_spec_version"`
 	Temperature           *float64  `json:"temperature"`
 	Seed                  *int      `json:"seed"`
 	Verdict               string    `json:"verdict"`
@@ -79,8 +79,8 @@ func New(taskID, repoRoot string) *Transcript {
 	return &Transcript{
 		TaskID:               taskID,
 		WallClockStart:       time.Now().UTC(),
-		HarnessVersion:       "ratchet-0.1.0-alpha",
-		RatchetSpecVersion:   "0.1",
+		HarnessVersion:       "maxwell-0.1.0-alpha",
+		MaxwellSpecVersion:   "0.1",
 		Verdict:              "FULL",
 		VerdictSource:        "aggregate",
 		JudgeKind:            "deterministic",
@@ -104,14 +104,14 @@ func (t *Transcript) AddEvent(e TranscriptEvent) {
 	t.Transcript = append(t.Transcript, e)
 }
 
-// Finalize writes the transcript to .ratchet/transcripts/<task-id>/<run-id>.json.
+// Finalize writes the transcript to .maxwell/transcripts/<task-id>/<run-id>.json.
 func (t *Transcript) Finalize() error {
 	if t.WallClockEnd.IsZero() {
 		t.WallClockEnd = time.Now().UTC()
 	}
 	t.WallClockDurationSec = t.WallClockEnd.Sub(t.WallClockStart).Seconds()
 
-	dir := filepath.Join(t.repoRoot, ".ratchet", "transcripts", t.TaskID)
+	dir := filepath.Join(t.repoRoot, ".maxwell", "transcripts", t.TaskID)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-# ratchet — Specification
+# maxwell — Specification
 
 Status: Draft v0.1.0 (pre-stable)
 Spec version: `0.1`
@@ -21,9 +21,9 @@ Code-generation agents produce work whose quality is uneven and whose self-repor
 1. **Self-evaluation is biased.** Models confidently rate their own output as correct even when it is not. Sleeper Agents (Hubinger et al. 2024) further demonstrates that adversarial training can teach a model to *hide* misbehavior rather than remove it; standard techniques can therefore "create a false impression of safety."
 2. **Soft review scales poorly.** Human review is sampling-based and post-hoc. As agent throughput rises, the bottleneck shifts from writing code to *managing* agentic work (Lopopolo, OpenAI Harness Engineering, Feb 2026).
 
-ratchet exists to close both problems by enforcing **hard, composable, deterministic verdicts** over agent output. Each verdict is a checkpoint with a binary outcome: nothing soft-passes. Gates are sequenced; failure of any gate fails the run. The first gate is red/green/refactor TDD: the agent MUST produce a failing test before production code, then make the test pass without breaking other tests, and MUST NOT delete or weaken existing tests.
+maxwell exists to close both problems by enforcing **hard, composable, deterministic verdicts** over agent output. Each verdict is a checkpoint with a binary outcome: nothing soft-passes. Gates are sequenced; failure of any gate fails the run. The first gate is red/green/refactor TDD: the agent MUST produce a failing test before production code, then make the test pass without breaking other tests, and MUST NOT delete or weaken existing tests.
 
-ratchet is intentionally portable. Its policy lives in `ratchet.md` and `AGENTS.md`; its gates live in `skills/<gate-name>/`; its host integration is one thin adapter per host (Claude Code v0; Codex App Server, Cursor, ACP, A2A reserved). A user MUST be able to clone ratchet onto a new codebase or take it between employers without dependency on a specific vendor.
+maxwell is intentionally portable. Its policy lives in `maxwell.md` and `AGENTS.md`; its gates live in `skills/<gate-name>/`; its host integration is one thin adapter per host (Claude Code v0; Codex App Server, Cursor, ACP, A2A reserved). A user MUST be able to clone maxwell onto a new codebase or take it between employers without dependency on a specific vendor.
 
 ## 2. Goals and Non-Goals
 
@@ -31,7 +31,7 @@ ratchet is intentionally portable. Its policy lives in `ratchet.md` and `AGENTS.
 
 - Enforce **hard verdicts** over agent output via deterministic, externally-verifiable gates.
 - Sequence gates with a strict reducer: any failure fails the run; any regression collapses the verdict to `NO`.
-- Keep gate **policy in-repo** (`ratchet.md`, `skills/`) so teams version their gates with their code.
+- Keep gate **policy in-repo** (`maxwell.md`, `skills/`) so teams version their gates with their code.
 - Define a **portable host-adapter protocol** so the same gate set works across Claude Code, Codex, Cursor, and any future host that respects the protocol.
 - Persist **Reflexion-shaped failure artifacts** (Shinn et al. 2023) so subsequent attempts can read prior reflections and avoid repeating mistakes.
 - Persist **METR/AISI-aligned structured transcripts** so longitudinal analysis (time-horizon, eval-awareness, reward-hacking detection) becomes possible without re-running.
@@ -41,26 +41,26 @@ ratchet is intentionally portable. Its policy lives in `ratchet.md` and `AGENTS.
 ### 2.2 Non-Goals
 
 - This specification does not prescribe a coding-style enforcement system. Gates that bake human-curated taxonomies of "good code" into the runner violate Sutton's Bitter Lesson and are out of scope (see §14.4).
-- This specification does not provide a general-purpose workflow orchestrator. ratchet runs gates against agent output; it does not schedule arbitrary jobs.
+- This specification does not provide a general-purpose workflow orchestrator. maxwell runs gates against agent output; it does not schedule arbitrary jobs.
 - This specification does not mandate a specific test framework or language. Gates are subprocess-shaped; any executable producing an exit code qualifies.
 - This specification does not provide a tracker integration in v0. Symphony's per-issue workspace pattern is reserved; v1+ MAY add a tracker layer.
-- This specification does not provide a managed multi-tenant deployment. ratchet runs locally or in CI; production deployments are the user's responsibility.
+- This specification does not provide a managed multi-tenant deployment. maxwell runs locally or in CI; production deployments are the user's responsibility.
 - This specification does not require LLM-judged primary verdicts. Such verdicts are forbidden by §13.
 
 ## 3. System Overview
 
 ### 3.1 The Six Layers
 
-ratchet is portable when kept in these layers. Each layer is replaceable; each gate fits exactly one layer.
+maxwell is portable when kept in these layers. Each layer is replaceable; each gate fits exactly one layer.
 
 1. **Policy Layer** (repo-defined)
-   - `ratchet.md` configuration + prompt body.
+   - `maxwell.md` configuration + prompt body.
    - `AGENTS.md` table-of-contents into `docs/`.
    - `skills/<gate-name>/SKILL.md` per-gate definitions.
    - Team-specific rules for gate selection, ordering, severity thresholds.
 
 2. **Configuration Layer** (typed getters)
-   - Parses `ratchet.md` frontmatter into typed runtime settings.
+   - Parses `maxwell.md` frontmatter into typed runtime settings.
    - Handles defaults, environment-variable resolution, path normalization, settings precedence (`user | project | local`).
 
 3. **Coordination Layer** (runner)
@@ -100,7 +100,7 @@ The `Session.events[]` log MUST be append-only and durable (filesystem in v0; op
 - A host CLI (Claude Code 2.1.x+ for v0).
 - The host's hook integration mechanism (Claude Code `PreToolUse` / `PostToolUse` for v0).
 
-ratchet MUST NOT require Docker, Kubernetes, or a specific cloud provider.
+maxwell MUST NOT require Docker, Kubernetes, or a specific cloud provider.
 
 ## 4. Core Domain Model
 
@@ -115,7 +115,7 @@ A `Gate` is a deterministic external verifier over agent output. Fields:
 - `severity` (enum: `P0` | `P1` | `P2`) — `P0` failures are unrecoverable; `P1` failures fail the run with retry permitted; `P2` failures are advisory and recorded but do not fail the run.
 - `scripts` (list) — ordered list of executables under `scripts/`. Verdict aggregation per §9.
 - `assumptions` (list of strings) — REQUIRED documentation of which model failure modes this gate covers (per Anthropic's "stress-test the assumptions" rule). Used during quarterly review.
-- `ratchet_spec_version` (string) — the spec version this gate is pinned to (e.g., `"0.1"`). Runners MUST refuse incompatible pins.
+- `maxwell_spec_version` (string) — the spec version this gate is pinned to (e.g., `"0.1"`). Runners MUST refuse incompatible pins.
 
 #### 4.1.2 Verdict
 
@@ -140,7 +140,7 @@ A `Reflection` is an artifact written after a gate failure that the next attempt
 - `attempt_number` (integer, ≥1).
 - `created_at` (UTC timestamp).
 
-Reflections persist at `.ratchet/reflections/<task-id>/<gate-name>/<attempt>.md`.
+Reflections persist at `.maxwell/reflections/<task-id>/<gate-name>/<attempt>.md`.
 
 #### 4.1.4 Transcript
 
@@ -194,26 +194,26 @@ A `GateRun` is one execution of one gate against one task attempt. Fields:
 
 ### 5.1 Required Files at Repository Root
 
-A repository using ratchet MUST contain:
+A repository using maxwell MUST contain:
 
-- `ratchet.md` — configuration + doctrine prompt body (§5.2).
+- `maxwell.md` — configuration + doctrine prompt body (§5.2).
 - `AGENTS.md` — table-of-contents into `docs/` (§5.3).
 - `skills/<gate-name>/SKILL.md` for each active gate (§5.4).
 
-A repository using ratchet SHOULD contain:
+A repository using maxwell SHOULD contain:
 
 - `docs/spec.md` — pinned reference to the spec version in use.
-- `.ratchet/settings.toml` (project scope).
-- `.ratchet/reflections/` (gitignored; runtime artifact directory).
-- `.ratchet/transcripts/` (gitignored or committed per team policy).
+- `.maxwell/settings.toml` (project scope).
+- `.maxwell/reflections/` (gitignored; runtime artifact directory).
+- `.maxwell/transcripts/` (gitignored or committed per team policy).
 
-### 5.2 `ratchet.md` Format
+### 5.2 `maxwell.md` Format
 
-`ratchet.md` is a Markdown file with REQUIRED YAML front matter.
+`maxwell.md` is a Markdown file with REQUIRED YAML front matter.
 
 ```markdown
 ---
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 verdict_model: hard         # hard | advisory; "advisory" forbidden in v0 except for P2 gates
 self_judgment: forbidden    # forbidden | permitted; "permitted" reserved for future versions
 gates:
@@ -222,10 +222,10 @@ gates:
 hooks:
   PreToolUse:
     - matcher: "Write|Edit"
-      command: "ratchet gate --on=PreToolUse"
+      command: "maxwell gate --on=PreToolUse"
   PostToolUse:
     - matcher: "Write|Edit"
-      command: "ratchet gate --on=PostToolUse"
+      command: "maxwell gate --on=PostToolUse"
 runner:
   timeout_ms: 60000
   flake_budget_pct: 0.5
@@ -234,10 +234,10 @@ workspace:
   cleanup: never            # never | on-completion | on-success
 ---
 
-# ratchet doctrine
+# maxwell doctrine
 
-(Markdown body — the prompt prepended to any agent encountering ratchet for the first time.
-Contains the TDD canon and core invariants. See ratchet.md in this repo for the canonical body.)
+(Markdown body — the prompt prepended to any agent encountering maxwell for the first time.
+Contains the TDD canon and core invariants. See maxwell.md in this repo for the canonical body.)
 ```
 
 Parsing rules:
@@ -258,7 +258,7 @@ Each gate is a skill bundle:
 
 ```
 skills/<gate-name>/
-├── SKILL.md            # YAML frontmatter (name, description, severity, ratchet_spec_version)
+├── SKILL.md            # YAML frontmatter (name, description, severity, maxwell_spec_version)
 └── scripts/
     └── <executable>    # exit code 0 = pass; non-zero = fail; stderr = reason
 ```
@@ -268,7 +268,7 @@ skills/<gate-name>/
 - `name` (REQUIRED) — MUST equal `<gate-name>`.
 - `description` (REQUIRED) — what + when.
 - `severity` (OPTIONAL) — `P0` | `P1` | `P2`. Default: `P1`.
-- `ratchet_spec_version` (REQUIRED) — e.g., `"0.1"`.
+- `maxwell_spec_version` (REQUIRED) — e.g., `"0.1"`.
 - `assumptions` (REQUIRED) — list of model-failure modes this gate covers. Used in quarterly review.
 
 Body is unrestricted Markdown but SHOULD describe the gate's contract: inputs, outputs, exit-code semantics, F2P/P2P interpretation if applicable.
@@ -277,9 +277,9 @@ Body is unrestricted Markdown but SHOULD describe the gate's contract: inputs, o
 
 Settings resolve in this order (later overrides earlier):
 
-1. `~/.ratchet/settings.toml` (user scope)
-2. `<repo>/.ratchet/settings.toml` (project scope)
-3. `<repo>/.ratchet/settings.local.toml` (local scope; gitignored)
+1. `~/.maxwell/settings.toml` (user scope)
+2. `<repo>/.maxwell/settings.toml` (project scope)
+3. `<repo>/.maxwell/settings.local.toml` (local scope; gitignored)
 
 This matches the claude-agent-sdk `SettingSource` precedence.
 
@@ -287,7 +287,7 @@ This matches the claude-agent-sdk `SettingSource` precedence.
 
 ### 6.1 Resolution Pipeline
 
-1. Locate `ratchet.md` (cwd default; `--config <path>` override).
+1. Locate `maxwell.md` (cwd default; `--config <path>` override).
 2. Parse front matter into raw config map.
 3. Apply built-in defaults for missing OPTIONAL fields.
 4. Resolve `$VAR_NAME` indirection only for values that explicitly contain it.
@@ -301,11 +301,11 @@ Environment variables MUST NOT globally override YAML values. They MAY only be s
 - Invalid front matter MUST fail startup with an operator-visible error.
 - Unknown top-level keys SHOULD be ignored for forward compatibility.
 - A gate referenced by `gates:` whose `skills/<name>/SKILL.md` does not exist MUST fail validation.
-- A `ratchet_spec_version` outside the runner's compatibility range MUST fail validation.
+- A `maxwell_spec_version` outside the runner's compatibility range MUST fail validation.
 
 ### 6.3 Dynamic Reload (Reserved for v1+)
 
-v0 reads configuration at startup. v1+ implementations MAY watch `ratchet.md` for changes and re-apply.
+v0 reads configuration at startup. v1+ implementations MAY watch `maxwell.md` for changes and re-apply.
 
 ## 7. Gate Lifecycle State Machine
 
@@ -328,7 +328,7 @@ v0 reads configuration at startup. v1+ implementations MAY watch `ratchet.md` fo
 
 ### 7.3 Sequencing
 
-Gates MUST run in the order declared in `ratchet.md`'s `gates:` list. Cheaper deterministic gates SHOULD precede expensive LLM-advisory gates so the run fails fast.
+Gates MUST run in the order declared in `maxwell.md`'s `gates:` list. Cheaper deterministic gates SHOULD precede expensive LLM-advisory gates so the run fails fast.
 
 A `P0` failure MUST abort all subsequent gates in the run. A `P1` failure MUST abort subsequent `P0` gates and MAY proceed with `P1`/`P2` gates per implementation policy. A `P2` failure MUST NOT abort the run.
 
@@ -379,9 +379,9 @@ A reflection MUST be written when a gate's verdict is `PARTIAL`, `NO`, or `ERROR
 
 ### 9.2 Persistence Path
 
-`<repo>/.ratchet/reflections/<task-id>/<gate-name>/<attempt-number>.md`
+`<repo>/.maxwell/reflections/<task-id>/<gate-name>/<attempt-number>.md`
 
-The directory `.ratchet/reflections/` SHOULD be gitignored.
+The directory `.maxwell/reflections/` SHOULD be gitignored.
 
 ### 9.3 Format
 
@@ -418,8 +418,8 @@ Reflections MUST NOT be modified after writing. Append-only.
 
 A host adapter MUST:
 
-- Translate the host's hook events into ratchet's gate dispatch (§3.2).
-- Generate the host's permission/settings file with values derived from `ratchet.md` (§10.2).
+- Translate the host's hook events into maxwell's gate dispatch (§3.2).
+- Generate the host's permission/settings file with values derived from `maxwell.md` (§10.2).
 - Stream agent activity (turns, tool calls) to the runner for transcript emission.
 
 A host adapter MUST NOT:
@@ -432,13 +432,13 @@ A host adapter MUST NOT:
 The Claude Code adapter MUST:
 
 - Generate `.claude/settings.json` (or `.claude_settings.json` in legacy projects) per attempt with:
-  - `permissions.allow` derived from `ratchet.md` (default: `["Read(./**)", "Write(./**)", "Bash(*)"]` with Bash gated by hooks).
+  - `permissions.allow` derived from `maxwell.md` (default: `["Read(./**)", "Write(./**)", "Bash(*)"]` with Bash gated by hooks).
   - `permissions.deny` for any path outside the workspace.
   - `permissionMode: "acceptEdits"` by default.
   - Hooks for `PreToolUse`, `PostToolUse`, `Stop`, `PreCompact`, `PostCompact` (PascalCase, exact match).
 - Pin minimum Claude CLI version `2.1.0`. The runner MUST refuse to launch against older CLIs.
 - Consume `claude --output-format stream-json` and parse JSONL events.
-- Emit ratchet transcript fields (§15) from the JSONL stream.
+- Emit maxwell transcript fields (§15) from the JSONL stream.
 
 ### 10.3 Reserved Adapter Namespaces
 
@@ -474,7 +474,7 @@ The Claude Code adapter MUST:
 
 ### 12.1 Failure Classes
 
-1. **Configuration failures**: missing or invalid `ratchet.md`; missing referenced skill; spec-version mismatch.
+1. **Configuration failures**: missing or invalid `maxwell.md`; missing referenced skill; spec-version mismatch.
 2. **Workspace failures**: directory creation failure; path-containment violation; permission error.
 3. **Gate-script failures**: timeout; infrastructure error; non-zero exit code; malformed output.
 4. **Host-adapter failures**: host CLI not found; version mismatch; protocol error.
@@ -527,7 +527,7 @@ Implementations SHOULD reserve a fraction of every run for **honeypot probes**: 
 The agent under test MUST NOT be able to read or write:
 
 - Gate scripts (`skills/<gate-name>/scripts/*`).
-- Gate evidence (`.ratchet/evidence/`).
+- Gate evidence (`.maxwell/evidence/`).
 - Reflection artifacts of the current run (until written and frozen).
 - Transcript files (until finalized).
 
@@ -563,7 +563,7 @@ Implementations MAY emit additional fields. Logs MUST NOT contain raw secrets, t
 
 ### 14.2 Transcripts (METR/AISI-Aligned)
 
-A transcript MUST be emitted per run at `.ratchet/transcripts/<task-id>/<run-id>.json`. REQUIRED fields:
+A transcript MUST be emitted per run at `.maxwell/transcripts/<task-id>/<run-id>.json`. REQUIRED fields:
 
 ```json
 {
@@ -582,7 +582,7 @@ A transcript MUST be emitted per run at `.ratchet/transcripts/<task-id>/<run-id>
   "model_version": "string",
   "harness_version": "string",
   "scaffold_config_hash": "string",
-  "ratchet_spec_version": "string",
+  "maxwell_spec_version": "string",
   "temperature": "number|null",
   "seed": "integer|null",
   "verdict": "FULL|PARTIAL|NO|ERROR",
@@ -718,7 +718,7 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 
 ### 16.1 Configuration and Repository Contract (Core)
 
-- C-1.1: Missing `ratchet.md` returns typed error.
+- C-1.1: Missing `maxwell.md` returns typed error.
 - C-1.2: Missing front matter delimiter returns typed error.
 - C-1.3: Front matter non-map returns typed error.
 - C-1.4: Empty Markdown body returns typed error.
@@ -793,7 +793,7 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 
 ### 17.1 v0.1 Core Conformance
 
-- [ ] `ratchet.md` parser with frontmatter + body split.
+- [ ] `maxwell.md` parser with frontmatter + body split.
 - [ ] `AGENTS.md` discovery (closest-file-wins).
 - [ ] Skill bundle loader (`skills/<name>/SKILL.md`).
 - [ ] Settings precedence (user/project/local).
@@ -823,7 +823,7 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 
 ### 17.4 v0.1 Self-Hosting
 
-- [ ] ratchet runs ratchet on its own commits in CI.
+- [ ] maxwell runs maxwell on its own commits in CI.
 - [ ] Conformance report published per release.
 
 ## 18. Glossary
@@ -838,7 +838,7 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 - **Hard verdict**: a verdict that cannot be soft-passed; a regression collapses to NO.
 - **Honeypot**: an input designed to detect deceptive or eval-aware behavior, off-distribution from the standard task corpus.
 - **Skill bundle**: `skills/<gate-name>/` directory containing `SKILL.md` and `scripts/`.
-- **Adapter**: a host-specific shim translating between the host's hook mechanism and ratchet's gate dispatch.
+- **Adapter**: a host-specific shim translating between the host's hook mechanism and maxwell's gate dispatch.
 - **Brain / Hands / Session**: the stateless-harness / interchangeable-sandbox / append-only-event-log triad reserved for v1+ implementations (Anthropic Managed Agents, Apr 2026).
 
 ## 19. Normative References
@@ -863,4 +863,4 @@ A conforming implementation MUST include tests covering the behaviors below. Pro
 
 ---
 
-*This specification is the durable artifact of the ratchet project. Reference implementations come and go; the spec persists. See `docs/maintenance.md` for the versioning, deprecation, and quarterly review protocol.*
+*This specification is the durable artifact of the maxwell project. Reference implementations come and go; the spec persists. See `docs/maintenance.md` for the versioning, deprecation, and quarterly review protocol.*

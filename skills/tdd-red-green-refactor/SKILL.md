@@ -2,7 +2,7 @@
 name: tdd-red-green-refactor
 description: Enforce red/green/refactor TDD via git topology. Verdict from F2P/P2P test runner exit codes; no LLM in the verdict loop. Triggered when the agent edits production code.
 severity: P0
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 assumptions:
   - "The model can produce production code without first writing a test that exercises the new behavior."
   - "The model can write a test that already passes against the base reference (does not exercise new behavior)."
@@ -12,7 +12,7 @@ assumptions:
 
 # tdd-red-green-refactor
 
-The first-class ratchet gate. Enforces three sub-properties of agent diffs:
+The first-class maxwell gate. Enforces three sub-properties of agent diffs:
 
 1. **Red phase exists** — every production-code edit is preceded (in this turn) by a new failing test.
 2. **Green phase achieved** — F2P tests pass and P2P tests still pass.
@@ -64,15 +64,15 @@ stderr format: `status=<pass|partial|fail|error> f2p=<float> p2p=<float> reason=
 
 ## Environment contract
 
-ratchet passes the workspace path as `$1`. Additional context via env vars:
+maxwell passes the workspace path as `$1`. Additional context via env vars:
 
-- `RATCHET_TASK_ID` — sanitized task identifier.
-- `RATCHET_BASE_REF` — git ref to diff against (default: `HEAD~1` or merge base).
-- `RATCHET_F2P_TESTS` — space-separated list of FAIL_TO_PASS test identifiers (optional; defaults inferred from diff).
-- `RATCHET_P2P_TESTS` — space-separated list of PASS_TO_PASS test identifiers (optional; defaults to "all not in F2P").
-- `RATCHET_PROD_CODE_GLOBS` — colon-separated globs for production code paths.
-- `RATCHET_TEST_GLOBS` — colon-separated globs for test paths.
-- `RATCHET_TEST_RUNNER` — auto-detected (go|pytest|npm|etc.) or set explicitly.
+- `MAXWELL_TASK_ID` — sanitized task identifier.
+- `MAXWELL_BASE_REF` — git ref to diff against (default: `HEAD~1` or merge base).
+- `MAXWELL_F2P_TESTS` — space-separated list of FAIL_TO_PASS test identifiers (optional; defaults inferred from diff).
+- `MAXWELL_P2P_TESTS` — space-separated list of PASS_TO_PASS test identifiers (optional; defaults to "all not in F2P").
+- `MAXWELL_PROD_CODE_GLOBS` — colon-separated globs for production code paths.
+- `MAXWELL_TEST_GLOBS` — colon-separated globs for test paths.
+- `MAXWELL_TEST_RUNNER` — auto-detected (go|pytest|npm|etc.) or set explicitly.
 
 ## Test runner detection
 
@@ -82,9 +82,9 @@ Auto-detection in priority order:
 2. `pyproject.toml` or `pytest.ini` exists → `pytest` with `-k` filter.
 3. `package.json` with `scripts.test` → `npm test`.
 4. `Cargo.toml` → `cargo test`.
-5. Otherwise `RATCHET_TEST_RUNNER` MUST be set.
+5. Otherwise `MAXWELL_TEST_RUNNER` MUST be set.
 
-The runner detection is implemented in the Go binary; the shell scripts here invoke `ratchet --internal-test-runner` for portability.
+The runner detection is implemented in the Go binary; the shell scripts here invoke `maxwell --internal-test-runner` for portability.
 
 ## What this gate does NOT do
 

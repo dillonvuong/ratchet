@@ -64,7 +64,7 @@ type Gate struct {
 	Name               string   `yaml:"name"`
 	Description        string   `yaml:"description"`
 	Severity           Severity `yaml:"severity"`
-	RatchetSpecVersion string   `yaml:"ratchet_spec_version"`
+	MaxwellSpecVersion string   `yaml:"maxwell_spec_version"`
 	Assumptions        []string `yaml:"assumptions"`
 	// Scripts is the ordered list of executables under skills/<name>/scripts/.
 	// Populated by LoadSkill from the directory, sorted alphabetically.
@@ -122,9 +122,9 @@ type Observability struct {
 	EvalAwarenessRecording string `yaml:"eval_awareness_recording"`
 }
 
-// Config is the typed view of ratchet.md's frontmatter.
+// Config is the typed view of maxwell.md's frontmatter.
 type Config struct {
-	RatchetSpecVersion string                  `yaml:"ratchet_spec_version"`
+	MaxwellSpecVersion string                  `yaml:"maxwell_spec_version"`
 	VerdictModel       string                  `yaml:"verdict_model"`
 	SelfJudgment       string                  `yaml:"self_judgment"`
 	Gates              []GateRef               `yaml:"gates"`
@@ -144,7 +144,7 @@ type Config struct {
 	LoadedGates []Gate `yaml:"-"`
 }
 
-// GateRef is the entry under `gates:` in ratchet.md frontmatter.
+// GateRef is the entry under `gates:` in maxwell.md frontmatter.
 type GateRef struct {
 	Name     string   `yaml:"name"`
 	Severity Severity `yaml:"severity"`

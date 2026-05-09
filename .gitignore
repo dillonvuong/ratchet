@@ -1,6 +1,6 @@
-# Build artifacts (root-level only — `cmd/ratchet/` is a directory, not a binary)
-/ratchet
-/ratchet.exe
+# Build artifacts (root-level only — `cmd/maxwell/` is a directory, not a binary)
+/maxwell
+/maxwell.exe
 /bin/
 /dist/
 *.test
@@ -12,11 +12,11 @@ vendor/
 *.o
 *.a
 
-# ratchet runtime artifacts
-.ratchet/reflections/
-.ratchet/transcripts/
-.ratchet/evidence/
-.ratchet/settings.local.toml
+# maxwell runtime artifacts
+.maxwell/reflections/
+.maxwell/transcripts/
+.maxwell/evidence/
+.maxwell/settings.local.toml
 
 # Editor
 .vscode/

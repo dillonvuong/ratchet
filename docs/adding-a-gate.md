@@ -13,7 +13,7 @@ skills/<gate-name>/
     └── <executable>
 ```
 
-The directory name, the `name:` field in `SKILL.md`, and the parent reference in `ratchet.md`'s `gates:` list MUST all match.
+The directory name, the `name:` field in `SKILL.md`, and the parent reference in `maxwell.md`'s `gates:` list MUST all match.
 
 ## Step 1: write the SKILL.md
 
@@ -22,7 +22,7 @@ The directory name, the `name:` field in `SKILL.md`, and the parent reference in
 name: lint-go
 description: Runs golangci-lint on changed .go files; verdict from exit code.
 severity: P1
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 assumptions:
   - "The model can produce code that compiles but fails standard idiomatic checks."
   - "The model can introduce dead code or unused imports without flagging."
@@ -60,12 +60,12 @@ The frontmatter `assumptions:` field is REQUIRED per spec §4.1.1 and is consult
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ratchet passes the workspace path as the first argument.
-# Additional context is in env vars: RATCHET_TASK_ID, RATCHET_BASE_REF.
+# maxwell passes the workspace path as the first argument.
+# Additional context is in env vars: MAXWELL_TASK_ID, MAXWELL_BASE_REF.
 
 cd "$1"
 
-if golangci-lint run --new-from-rev="${RATCHET_BASE_REF:-HEAD~1}" 2>&1; then
+if golangci-lint run --new-from-rev="${MAXWELL_BASE_REF:-HEAD~1}" 2>&1; then
   echo "status=pass reason=lint-clean" >&2
   exit 0
 else
@@ -83,7 +83,7 @@ Exit codes:
 
 Any other non-zero is treated as `NO`.
 
-## Step 3: register the gate in ratchet.md
+## Step 3: register the gate in maxwell.md
 
 ```yaml
 gates:
@@ -105,17 +105,17 @@ Per spec §16, every gate that ships a non-trivial verdict computation MUST have
 
 Place tests at `skills/<gate-name>/test/` or in your normal test directory. The runner's self-test (§17.4) will pick them up.
 
-## Step 5: run ratchet on ratchet
+## Step 5: run maxwell on maxwell
 
 ```
-$ ratchet run --gate=lint-go
+$ maxwell run --gate=lint-go
 [lint-go] status=pass reason=lint-clean (P1, FULL, 1.2s)
 ```
 
 If the gate fails, a reflection is written. Inspect:
 
 ```
-$ cat .ratchet/reflections/<task-id>/lint-go/1.md
+$ cat .maxwell/reflections/<task-id>/lint-go/1.md
 ```
 
 ## F2P / P2P pattern (worked example)
@@ -167,7 +167,7 @@ Avoid:
 
 ## Versioning
 
-Each gate pins `ratchet_spec_version: "0.1"`. When the spec version bumps, gates MUST be reviewed. Spec version compatibility per §4.2: a gate pinned to `"0.1"` runs on any `0.1.x` runner; pinning to `"0.2"` requires a runner at `0.2.0` or later.
+Each gate pins `maxwell_spec_version: "0.1"`. When the spec version bumps, gates MUST be reviewed. Spec version compatibility per §4.2: a gate pinned to `"0.1"` runs on any `0.1.x` runner; pinning to `"0.2"` requires a runner at `0.2.0` or later.
 
 When deprecating a gate (per `docs/maintenance.md`), update the SKILL.md frontmatter:
 

@@ -2,7 +2,7 @@
 // contract from spec §10.
 //
 // On a non-FULL gate verdict, the runner writes one Markdown file under
-// .ratchet/reflections/<task-id>/<gate-name>/<attempt>.md. The next
+// .maxwell/reflections/<task-id>/<gate-name>/<attempt>.md. The next
 // attempt's prompt prepends the most recent reflection so the agent can
 // learn from prior failure (Shinn et al. 2023).
 //
@@ -32,7 +32,7 @@ type Reflection struct {
 }
 
 // ErrPathEscape is returned when a taskID or gateName would resolve to a
-// filesystem location outside repoRoot/.ratchet/reflections/, or when the
+// filesystem location outside repoRoot/.maxwell/reflections/, or when the
 // segments contain path separators / traversal components. Spec §11.3
 // Invariant 2: workspace path MUST stay inside workspace root. We extend
 // that invariant to reflection paths because they are co-located.
@@ -62,7 +62,7 @@ func validatePathSegment(name, s string) error {
 	return nil
 }
 
-// Write persists a Reflection to disk under repoRoot/.ratchet/reflections/...
+// Write persists a Reflection to disk under repoRoot/.maxwell/reflections/...
 // Returns the absolute path written. Rejects taskID/gateName that contain
 // path-traversal components or path separators. Spec §11.3: identifiers
 // MUST consist of [A-Za-z0-9._-] only; we extend the same constraint to
@@ -74,7 +74,7 @@ func Write(repoRoot, taskID, gateName string, attempt int, r Reflection) (string
 	if err := validatePathSegment("gateName", gateName); err != nil {
 		return "", err
 	}
-	root, err := filepath.Abs(filepath.Join(repoRoot, ".ratchet", "reflections"))
+	root, err := filepath.Abs(filepath.Join(repoRoot, ".maxwell", "reflections"))
 	if err != nil {
 		return "", err
 	}
@@ -125,7 +125,7 @@ created_at: %s
 // sort numerically so attempt 10 follows attempt 9 (lexicographic sort
 // would order "10.md" before "2.md").
 func LatestForGate(repoRoot, taskID, gateName string) string {
-	dir := filepath.Join(repoRoot, ".ratchet", "reflections", taskID, gateName)
+	dir := filepath.Join(repoRoot, ".maxwell", "reflections", taskID, gateName)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return ""

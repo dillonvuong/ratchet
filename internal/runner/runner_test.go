@@ -121,7 +121,7 @@ func TestRun_P0AbortStopsSubsequentGates(t *testing.T) {
 		md := fmt.Sprintf(`---
 name: %s
 description: test gate.
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 assumptions:
   - "test"
 ---
@@ -134,8 +134,8 @@ assumptions:
 	mkSkill("gate-a", 1) // NO
 	mkSkill("gate-b", 0) // would be FULL
 
-	ratchetMD := `---
-ratchet_spec_version: "0.1"
+	maxwellMD := `---
+maxwell_spec_version: "0.1"
 verdict_model: hard
 self_judgment: forbidden
 
@@ -154,8 +154,8 @@ workspace:
 ---
 # body
 `
-	cfgPath := filepath.Join(dir, "ratchet.md")
-	if err := os.WriteFile(cfgPath, []byte(ratchetMD), 0o644); err != nil {
+	cfgPath := filepath.Join(dir, "maxwell.md")
+	if err := os.WriteFile(cfgPath, []byte(maxwellMD), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -197,7 +197,7 @@ func TestRunScript_TimeoutYieldsERROR(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "skills", "slow", "SKILL.md"), []byte(`---
 name: slow
 description: test gate.
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 assumptions:
   - "test"
 ---
@@ -206,9 +206,9 @@ assumptions:
 		t.Fatal(err)
 	}
 
-	cfgPath := filepath.Join(dir, "ratchet.md")
+	cfgPath := filepath.Join(dir, "maxwell.md")
 	if err := os.WriteFile(cfgPath, []byte(`---
-ratchet_spec_version: "0.1"
+maxwell_spec_version: "0.1"
 verdict_model: hard
 self_judgment: forbidden
 

@@ -20,8 +20,8 @@ cd "$WORKSPACE"
 
 # Auto-detect runner.
 runner=""
-if [ -n "${RATCHET_TEST_RUNNER:-}" ]; then
-  runner="$RATCHET_TEST_RUNNER"
+if [ -n "${MAXWELL_TEST_RUNNER:-}" ]; then
+  runner="$MAXWELL_TEST_RUNNER"
 elif [ -f "go.mod" ]; then
   runner="go"
 elif [ -f "pyproject.toml" ] || [ -f "pytest.ini" ] || [ -f "setup.cfg" ]; then
@@ -35,7 +35,7 @@ else
   exit 3
 fi
 
-OUT_FILE="$(mktemp -t ratchet-test-output.XXXXXX 2>/dev/null || mktemp)"
+OUT_FILE="$(mktemp -t maxwell-test-output.XXXXXX 2>/dev/null || mktemp)"
 trap 'rm -f "$OUT_FILE"' EXIT
 
 # Run all tests at HEAD. Capture stdout+stderr to a per-run file (unique

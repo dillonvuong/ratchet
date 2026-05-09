@@ -1,16 +1,16 @@
 # Spec Maintenance Protocol
 
-The ratchet spec is a living document with a deliberate cadence. The premise is Anthropic's: every harness component encodes an assumption about model weakness; those assumptions go stale as models improve. The spec must reflect current assumptions, not historical ones.
+The maxwell spec is a living document with a deliberate cadence. The premise is Anthropic's: every harness component encodes an assumption about model weakness; those assumptions go stale as models improve. The spec must reflect current assumptions, not historical ones.
 
 ## Versioning
 
-ratchet uses Semantic Versioning of the spec itself.
+maxwell uses Semantic Versioning of the spec itself.
 
 - **v0.x** — pre-stable. Breaking changes are permitted with a `CHANGELOG.md` entry.
 - **v1.0+** — stable. Breaking changes require a major version bump and are subject to the deprecation policy below.
 - Spec version comparison is minor-version-tolerant: a gate pinned to `"0.1"` runs on any `0.1.x` runner.
 
-The reference Go implementation in this monorepo is tagged in lockstep: `ratchet@0.1.0` runs `spec@0.1.x`.
+The reference Go implementation in this monorepo is tagged in lockstep: `maxwell@0.1.0` runs `spec@0.1.x`.
 
 ## Deprecation policy
 
@@ -110,7 +110,7 @@ The review is documented in `docs/quarterly-reviews/<YYYY-Q<N>>.md`.
 
 ## Reference-implementation lockstep
 
-The Go runner in `cmd/ratchet/` and the spec are tagged together. A spec change that requires a runner change MUST land both in the same release. If the runner cannot be updated in time, the spec change is held.
+The Go runner in `cmd/maxwell/` and the spec are tagged together. A spec change that requires a runner change MUST land both in the same release. If the runner cannot be updated in time, the spec change is held.
 
 This prevents "spec ahead of impl" drift, which is a common failure mode in spec-driven projects.
 
@@ -122,13 +122,13 @@ When a primary source goes offline, prefer recovering it via Wayback Machine and
 
 ## Self-hosting
 
-ratchet runs ratchet on its own commits. The `.github/workflows/ci.yml` invokes the runner against every PR; the TDD gate gates ratchet's own development.
+maxwell runs maxwell on its own commits. The `.github/workflows/ci.yml` invokes the runner against every PR; the TDD gate gates maxwell's own development.
 
 This is the strongest form of dogfooding: the spec's first-class gate gates the spec itself.
 
 ## Versioning the doctrine
 
-The `ratchet.md` Markdown body — the doctrine prompt prepended to agents — also versions. Major doctrine changes bump the minor version of the spec. The doctrine is the most user-visible artifact and changes to it ripple into every agent's behavior; treat it with the same care as a normative spec section.
+The `maxwell.md` Markdown body — the doctrine prompt prepended to agents — also versions. Major doctrine changes bump the minor version of the spec. The doctrine is the most user-visible artifact and changes to it ripple into every agent's behavior; treat it with the same care as a normative spec section.
 
 ## What we will not do
 
